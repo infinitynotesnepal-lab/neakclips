@@ -503,7 +503,7 @@ def asset(name: str):
 
 @app.get("/favicon.ico")
 def favicon():
-    return RedirectResponse("/brand/favicon.svg", 308)
+    return RedirectResponse("/brand/neakclips-icon.svg", 308)
 
 
 # ================================================================ sign up, sign in, sign out
@@ -1175,7 +1175,7 @@ def clips_zip(ids: str = ""):
     except ValueError as e:
         raise HTTPException(400, str(e))
     from starlette.background import BackgroundTask
-    return FileResponse(f, filename=f"peakcut-clips-{len(pairs)}.zip", media_type="application/zip",
+    return FileResponse(f, filename=f"neakclips-clips-{len(pairs)}.zip", media_type="application/zip",
                         headers={"Cache-Control": "private, no-store"}, background=BackgroundTask(lambda: f.unlink(missing_ok=True)))
 
 
