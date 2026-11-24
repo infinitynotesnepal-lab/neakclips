@@ -503,7 +503,7 @@ def asset(name: str):
 
 @app.get("/favicon.ico")
 def favicon():
-    return RedirectResponse("/brand/neakclips-icon.svg", 308)
+    return RedirectResponse("/brand/neakclips-icon.svg?v=2", 308)
 
 
 # ================================================================ sign up, sign in, sign out

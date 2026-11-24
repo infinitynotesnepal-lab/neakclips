@@ -7,14 +7,14 @@
 <meta name="description" content="Reset the password for your NeakClips account.">
 <meta name="referrer" content="no-referrer">
 <script src="/assets/csrf.js"></script>
-<link rel="icon" type="image/svg+xml" href="/brand/neakclips-icon.svg">
+<link rel="icon" type="image/svg+xml" href="/brand/neakclips-icon.svg?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--brand:#7C5CFF;--brand-hi:#8E72FF;--ink:#1B1440;--soft:#F1EDFF;--line-b:#DCD3FF;--deep:#5B3FD6;
-  --frame:#14112A;--frame-2:#221D42;--frame-text:#EEEDF7;--frame-dim:#9A97B8;
-  --muted:#F5F5FA;--line:#ECEBF3;--line-2:#DEDCEA;--text:#1B1830;--dim:#5E5B78;--faint:#9592AD;--bad:#D3343F;--bad-soft:#FDECEE;
+:root{--on-brand:#FFFFFF;--accent:#ABFFAE;--accent-ink:#00262B;--brand:#0B363B;--brand-hi:#00262B;--ink:#00262B;--soft:#EAFDE8;--line-b:#CDE3E5;--deep:#28555B;
+  --frame:#00262B;--frame-2:#0B363B;--frame-text:#E5F4F5;--frame-dim:#A1C2C6;
+  --muted:#F5F5F5;--line:#EBEBEB;--line-2:#D9D9D9;--text:#121212;--dim:#5C5C5C;--faint:#8F8F8F;--bad:#D3343F;--bad-soft:#FDECEE;
   --r-lg:16px;--r:12px;--r-sm:8px;color-scheme:light}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -24,12 +24,12 @@ h1,h2,h3,p{margin:0}
 a{color:inherit}
 svg{width:18px;height:18px;flex:none;fill:currentColor}
 :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:var(--r);border:1px solid var(--line-2);background:#fff;color:var(--text);
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--text);
   font:inherit;font-weight:600;font-size:15px;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s ease,border-color .15s ease,color .15s ease}
-.btn:hover{background:var(--muted);border-color:#CFCDDF}
-.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--ink)}
+.btn:hover{background:var(--muted);border-color:#CFCFCF}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
 .btn.primary:hover{background:var(--brand-hi);border-color:var(--brand-hi)}
-.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}.btn.dark:hover{background:#2D2756;border-color:#2D2756}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}.btn.dark:hover{background:#28555B;border-color:#28555B}
 .btn.sm{height:38px;padding:0 14px;font-size:14px}
 .btn.lg{height:52px;padding:0 26px;font-size:16px}
 .btn:disabled{opacity:.5;cursor:default}
@@ -39,9 +39,9 @@ body{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,
 .side{color:var(--frame-text);padding:40px 48px;display:flex;flex-direction:column;justify-content:space-between;min-height:100vh}
 .side img{height:38px}
 .side h1{font-size:clamp(30px,3.2vw,42px);line-height:1.1;letter-spacing:-.03em;font-weight:700;color:#fff;max-width:440px}
-.side h1 em{font-style:normal;color:var(--brand)}
+.side h1 em{font-style:normal;color:var(--accent)}
 .side ul{list-style:none;padding:0;margin:28px 0 0;display:flex;flex-direction:column;gap:14px;color:var(--frame-dim);font-size:16px}
-.side li{display:flex;gap:12px;align-items:flex-start}.side li svg{color:var(--brand);margin-top:3px}
+.side li{display:flex;gap:12px;align-items:flex-start}.side li svg{color:var(--accent);margin-top:3px}
 .side small{color:var(--frame-dim);font-size:13px}
 .main{background:#fff;margin:8px 8px 8px 0;border-radius:var(--r-lg);display:grid;place-items:center;padding:32px 20px}
 .card{width:100%;max-width:400px}
@@ -50,7 +50,7 @@ body{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,
 form{display:flex;flex-direction:column;gap:16px}
 label{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:600;color:var(--dim)}
 input{height:46px;padding:0 14px;border-radius:var(--r-sm);border:1px solid var(--line-2);background:#fff;font:inherit;color:var(--text);outline:none;transition:border-color .15s ease,background-color .15s ease}
-input:hover{border-color:#CFCDDF}input:focus{border-color:var(--brand);background:#fff}
+input:hover{border-color:#CFCFCF}input:focus{border-color:var(--brand);background:#fff}
 input:focus-visible{outline:none}
 input::placeholder{color:var(--faint)}
 .btn{width:100%;height:48px}
@@ -72,7 +72,7 @@ input::placeholder{color:var(--faint)}
 </head>
 <body>
 <aside class="side">
-  <a href="/" aria-label="NeakClips home"><img src="/brand/neakclips-logo-light.svg" alt="NeakClips"></a>
+  <a href="/" aria-label="NeakClips home"><img src="/brand/neakclips-logo-light.svg?v=2" alt="NeakClips"></a>
   <div>
     <h1>Clips from every stream, <em>without watching all of it.</em></h1>
     <ul>
@@ -84,7 +84,7 @@ input::placeholder{color:var(--faint)}
   <small>© <span id="year"></span> NeakClips · <a href="/privacy" style="color:inherit">Privacy</a> · <a href="/terms" style="color:inherit">Terms</a></small>
 </aside>
 <main class="main"><div class="card">
-  <a href="/"><img class="mobile-logo" src="/brand/neakclips-logo.svg" alt="NeakClips"></a>
+  <a href="/"><img class="mobile-logo" src="/brand/neakclips-logo.svg?v=2" alt="NeakClips"></a>
   <h2 id="h">Reset your password</h2><p id="p">Enter the email you signed up with and we'll send you a link to choose a new password.</p>
   <form id="ask" novalidate>
     <div class="err" id="err" role="alert"></div>

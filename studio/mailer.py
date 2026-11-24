@@ -34,29 +34,29 @@ def _html(title: str, intro: str, button: str, link: str, outro: str, logo_src: 
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light only"><title>{e(title)}</title></head>
-<body style="margin:0;padding:0;background:#EEEDF7;-webkit-text-size-adjust:100%">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#EEEDF7">{e(intro)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EEEDF7"><tr><td align="center" style="padding:36px 14px">
+<body style="margin:0;padding:0;background:#E5F4F5;-webkit-text-size-adjust:100%">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#E5F4F5">{e(intro)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#E5F4F5"><tr><td align="center" style="padding:36px 14px">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
     <tr><td style="padding:0 6px 22px"><a href="{e(site)}" style="text-decoration:none">
       <img src="{e(logo_src)}" width="138" height="38" alt="NeakClips" style="display:block;border:0;width:138px;height:38px"></a></td></tr>
-    <tr><td style="background:#ffffff;border-radius:18px;border:1px solid #E4E2EE;padding:36px 34px">
+    <tr><td style="background:#ffffff;border-radius:18px;border:1px solid #E3E3E3;padding:36px 34px">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-        <tr><td style="font-family:{font};font-size:24px;line-height:1.25;font-weight:700;color:#1B1440;padding-bottom:12px">{e(title)}</td></tr>
-        <tr><td style="font-family:{font};font-size:16px;line-height:1.65;color:#4C4966;padding-bottom:28px">{e(intro)}</td></tr>
+        <tr><td style="font-family:{font};font-size:24px;line-height:1.25;font-weight:700;color:#00262B;padding-bottom:12px">{e(title)}</td></tr>
+        <tr><td style="font-family:{font};font-size:16px;line-height:1.65;color:#474747;padding-bottom:28px">{e(intro)}</td></tr>
         <tr><td style="padding-bottom:28px">
-          <table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:12px;background:#7C5CFF">
-            <a href="{e(link)}" style="display:inline-block;padding:14px 28px;font-family:{font};font-size:16px;font-weight:700;color:#1B1440;text-decoration:none;border-radius:12px">{e(button)}</a>
+          <table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:12px;background:#0B363B">
+            <a href="{e(link)}" style="display:inline-block;padding:14px 28px;font-family:{font};font-size:16px;font-weight:700;color:#00262B;text-decoration:none;border-radius:12px">{e(button)}</a>
           </td></tr></table></td></tr>
-        <tr><td style="font-family:{font};font-size:14px;line-height:1.6;color:#6B6888;padding-bottom:22px">{e(outro)}</td></tr>
-        <tr><td style="border-top:1px solid #ECEBF3;padding-top:18px;font-family:{font};font-size:12px;line-height:1.6;color:#8C89A8">
-          Button not working? Copy this link into your browser:<br><a href="{e(link)}" style="color:#5B3FD6;word-break:break-all">{e(link)}</a></td></tr>
+        <tr><td style="font-family:{font};font-size:14px;line-height:1.6;color:#666666;padding-bottom:22px">{e(outro)}</td></tr>
+        <tr><td style="border-top:1px solid #EBEBEB;padding-top:18px;font-family:{font};font-size:12px;line-height:1.6;color:#858585">
+          Button not working? Copy this link into your browser:<br><a href="{e(link)}" style="color:#28555B;word-break:break-all">{e(link)}</a></td></tr>
       </table></td></tr>
-    <tr><td align="center" style="padding:24px 10px 0;font-family:{font};font-size:12px;line-height:1.7;color:#8C89A8">
+    <tr><td align="center" style="padding:24px 10px 0;font-family:{font};font-size:12px;line-height:1.7;color:#858585">
       You're getting this because of your NeakClips account. We only email you about your account.<br>
-      <a href="{e(site)}" style="color:#6B6888;text-decoration:underline">NeakClips</a> &nbsp;·&nbsp;
-      <a href="{e(site)}/privacy" style="color:#6B6888;text-decoration:underline">Privacy</a> &nbsp;·&nbsp;
-      <a href="{e(site)}/terms" style="color:#6B6888;text-decoration:underline">Terms</a></td></tr>
+      <a href="{e(site)}" style="color:#666666;text-decoration:underline">NeakClips</a> &nbsp;·&nbsp;
+      <a href="{e(site)}/privacy" style="color:#666666;text-decoration:underline">Privacy</a> &nbsp;·&nbsp;
+      <a href="{e(site)}/terms" style="color:#666666;text-decoration:underline">Terms</a></td></tr>
   </table></td></tr></table></body></html>"""
 
 

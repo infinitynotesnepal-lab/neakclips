@@ -7,7 +7,7 @@
 <meta name="description" content="NeakClips clips Twitch, Kick and YouTube live streams while they're still live. AI finds the best moments and turns them into captioned vertical Shorts, Reels and TikToks. Free and open source.">
 <link rel="canonical" href="{{SITE}}/">
 <meta name="robots" content="index,follow,max-image-preview:large">
-<meta name="theme-color" content="#7C5CFF">
+<meta name="theme-color" content="#0B363B">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NeakClips">
 <meta property="og:url" content="{{SITE}}/">
@@ -16,10 +16,10 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="NeakClips: clip live streams while they're still live">
 <meta name="twitter:description" content="AI stream clipper for Twitch, Kick and YouTube. Captioned vertical clips. Free and open source.">
-<link rel="icon" type="image/svg+xml" href="/brand/neakclips-icon.svg">
+<link rel="icon" type="image/svg+xml" href="/brand/neakclips-icon.svg?v=2">
 <link rel="preload" as="image" href="/brand/demo-hype.jpg" fetchpriority="high">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "NeakClips", "applicationCategory": "MultimediaApplication", "operatingSystem": "Web browser", "url": "{{SITE}}/", "image": "{{SITE}}/brand/neakclips-logo.svg", "description": "Free, open source AI clip maker that turns Twitch, Kick and YouTube live streams and videos into captioned vertical clips for YouTube Shorts, Instagram Reels and TikTok.", "isAccessibleForFree": true, "featureList": ["Clips live streams while they are live", "AI picks the best moments", "Word-by-word captions", "Vertical 9:16 clips", "Twitch, Kick and YouTube", "Posts to YouTube Shorts and Instagram Reels", "Works with your own AI key"]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "NeakClips", "url": "{{SITE}}/", "logo": "{{SITE}}/brand/neakclips-logo.svg"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "NeakClips", "applicationCategory": "MultimediaApplication", "operatingSystem": "Web browser", "url": "{{SITE}}/", "image": "{{SITE}}/brand/neakclips-logo.svg?v=2", "description": "Free, open source AI clip maker that turns Twitch, Kick and YouTube live streams and videos into captioned vertical clips for YouTube Shorts, Instagram Reels and TikTok.", "isAccessibleForFree": true, "featureList": ["Clips live streams while they are live", "AI picks the best moments", "Word-by-word captions", "Vertical 9:16 clips", "Twitch, Kick and YouTube", "Posts to YouTube Shorts and Instagram Reels", "Works with your own AI key"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "NeakClips", "url": "{{SITE}}/", "logo": "{{SITE}}/brand/neakclips-logo.svg?v=2"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is NeakClips free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. NeakClips is free and open source. You run it on your own computer or server, and there are no plans or fees."}}, {"@type": "Question", "name": "Which AI does it use?", "acceptedAnswer": {"@type": "Answer", "text": "Your own. Add an API key for Gemini, OpenAI, Grok, Claude or OpenRouter, or point it at a local model. Whatever the AI costs is between you and that provider."}}, {"@type": "Question", "name": "What happens without an AI key?", "acceptedAnswer": {"@type": "Answer", "text": "NeakClips still makes clips, picking the loudest moments that have speech in them. Add a key and the AI chooses the moments and writes the hooks and titles."}}, {"@type": "Question", "name": "Which videos work best?", "acceptedAnswer": {"@type": "Answer", "text": "Anything with people talking and reacting: live streams, gaming VODs, podcasts, interviews. Links can be from YouTube, Twitch or Kick, or you can upload a video file. Captions are written from English speech."}}, {"@type": "Question", "name": "How long are the clips, and what shape?", "acceptedAnswer": {"@type": "Answer", "text": "Vertical 9:16, the shape Shorts, Reels and TikTok use. They run 15 to 60 seconds by default and you can set your own range. Choose a blurred fill, a zoomed frame or a centre crop."}}, {"@type": "Question", "name": "Can I change a clip afterwards?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Open any clip to trim the start and end, rewrite the hook and title, or switch caption style and layout, then re-make it."}}, {"@type": "Question", "name": "Can I clip any streamer?", "acceptedAnswer": {"@type": "Answer", "text": "NeakClips is a tool. You are responsible for having the right to clip and post a creator's content; most clipping programs ask you to follow the creator's own rules."}}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,26 +27,26 @@
 <script>document.documentElement.classList.add("js")</script>
 <script src="/assets/gradient-ascii.js" defer></script>
 <style>
-:root{--brand:#7C5CFF;--brand-hi:#8E72FF;--ink:#1B1440;--soft:#F1EDFF;--line-b:#DCD3FF;--deep:#5B3FD6;
-  --frame:#14112A;--frame-2:#221D42;--frame-text:#EEEDF7;--frame-dim:#9A97B8;
-  --muted:#F5F5FA;--line:#ECEBF3;--line-2:#DEDCEA;--text:#1B1830;--dim:#5E5B78;--faint:#9592AD;--good:#0F8A57;
+:root{--on-brand:#FFFFFF;--accent:#ABFFAE;--accent-ink:#00262B;--brand:#0B363B;--brand-hi:#00262B;--ink:#00262B;--soft:#EAFDE8;--line-b:#CDE3E5;--deep:#28555B;
+  --frame:#00262B;--frame-2:#0B363B;--frame-text:#E5F4F5;--frame-dim:#A1C2C6;
+  --muted:#F5F5F5;--line:#EBEBEB;--line-2:#D9D9D9;--text:#121212;--dim:#5C5C5C;--faint:#8F8F8F;--good:#0F8A57;
   --r-lg:16px;--r:12px;--r-sm:8px;--ease:cubic-bezier(.2,.7,.2,1);color-scheme:light}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{scroll-behavior:smooth}
 [id]{scroll-margin-top:88px}
-footer.site{background:#14112A;color:#AAA7C2;padding:56px 0 28px;font-size:14px}
+footer.site{background:#00262B;color:#A4A4A4;padding:56px 0 28px;font-size:14px}
 footer.site .fwrap{max-width:1160px;margin:0 auto;padding:0 24px}
 footer.site .fgrid{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:32px}
 footer.site .fbrand img{height:30px;display:block;margin-bottom:14px}
-footer.site .fbrand p{max-width:300px;line-height:1.6;margin:0 0 18px;color:#AAA7C2}
-footer.site .fbrand a.fcta{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;background:#7C5CFF;color:#1B1440;font-weight:600;text-decoration:none;transition:background-color .15s ease}
-footer.site .fbrand a.fcta:hover{background:#8E72FF}
+footer.site .fbrand p{max-width:300px;line-height:1.6;margin:0 0 18px;color:#A4A4A4}
+footer.site .fbrand a.fcta{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;background:#0B363B;color:#00262B;font-weight:600;text-decoration:none;transition:background-color .15s ease}
+footer.site .fbrand a.fcta:hover{background:#00262B}
 footer.site h4{font-size:13px;font-weight:600;color:#fff;margin:4px 0 14px}
 footer.site ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
-footer.site ul a{color:#AAA7C2;text-decoration:none;transition:color .15s ease}
-footer.site ul a:hover{color:#7C5CFF}
-footer.site .fbottom{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:44px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);font-size:13px;color:#7F7C99}
+footer.site ul a{color:#A4A4A4;text-decoration:none;transition:color .15s ease}
+footer.site ul a:hover{color:#0B363B}
+footer.site .fbottom{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:44px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);font-size:13px;color:#7A7A7A}
 @media (max-width:760px){footer.site .fgrid{grid-template-columns:1fr 1fr}footer.site .fbrand{grid-column:1/-1}}
 body{margin:0;background:#fff;color:var(--text);font:16px/1.55 "Geist","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 h1,h2,h3,p{margin:0}
@@ -54,11 +54,11 @@ a{color:inherit}
 svg{width:18px;height:18px;flex:none;fill:currentColor}
 :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:var(--r);border:1px solid var(--line-2);background:#fff;color:var(--text);
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--text);
   font:inherit;font-weight:600;font-size:15px;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s ease,border-color .15s ease,color .15s ease}
-.btn:hover{background:var(--muted);border-color:#CFCDDF}
-.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--ink)}.btn.primary:hover{background:var(--brand-hi);border-color:var(--brand-hi)}
-.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}.btn.dark:hover{background:#2D2756;border-color:#2D2756}
+.btn:hover{background:var(--muted);border-color:#CFCFCF}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}.btn.primary:hover{background:var(--brand-hi);border-color:var(--brand-hi)}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}.btn.dark:hover{background:#28555B;border-color:#28555B}
 .btn.sm{height:38px;padding:0 14px;font-size:14px}
 .kicker{font-size:15px;font-weight:600;color:var(--deep);margin-bottom:12px}
 h2{font-size:clamp(26px,3vw,36px);letter-spacing:-.035em;line-height:1.08;font-weight:600;color:var(--ink)}
@@ -90,7 +90,7 @@ header.nav .btn.cta{height:40px;padding:0 18px;border-radius:999px;font-size:15p
 .hero-copy{position:relative;z-index:10;max-width:820px;margin:0 auto;padding:0 24px;text-align:center}
 .announce{display:inline-flex;align-items:center;gap:10px;font-size:14px;font-weight:500;color:var(--text);background:#fff;border:1px solid var(--line-2);
   padding:6px 8px 6px 14px;border-radius:999px;text-decoration:none;margin-bottom:18px;transition:border-color .15s ease}
-.announce:hover{border-color:#CFCDDF}
+.announce:hover{border-color:#CFCFCF}
 .announce i{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.3s infinite}
 .announce .livepill{padding:3px 10px 3px 9px;font-size:12px}
 .announce .as{display:none}
@@ -99,7 +99,7 @@ header.nav .btn.cta{height:40px;padding:0 18px;border-radius:999px;font-size:15p
 .announce b svg{width:14px;height:14px}
 @keyframes pulse{50%{opacity:.3}}
 h1{font-size:clamp(30px,3.7vw,46px);line-height:1.08;letter-spacing:-.045em;font-weight:600;color:var(--ink)}
-h1 .hl{display:inline-block;background:var(--brand);color:var(--ink);padding:0 .22em .06em;border-radius:.24em;margin-top:.08em}
+h1 .hl{display:inline-block;background:var(--brand);color:var(--on-brand);padding:0 .22em .06em;border-radius:.24em;margin-top:.08em}
 .lede{font-size:16px;color:var(--dim);margin:12px auto 18px;max-width:520px}
 .ask{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
 .bar{background:#fff;border:1px solid var(--line-2);border-radius:999px;padding:6px;flex:0 1 560px;transition:border-color .2s ease}
@@ -119,9 +119,9 @@ h1 .hl{display:inline-block;background:var(--brand);color:var(--ink);padding:0 .
 .reel figure.mid{flex-basis:190px}
 .phone{position:relative;width:100%;aspect-ratio:9/16;border-radius:22px;overflow:hidden;background:var(--frame);border:6px solid var(--frame)}
 .phone video{width:100%;height:100%;object-fit:cover;display:block}
-.phone .snd{position:absolute;right:10px;bottom:10px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(20,17,42,.72);color:#fff;
+.phone .snd{position:absolute;right:10px;bottom:10px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,38,43,.72);color:#fff;
   display:grid;place-items:center;cursor:pointer;transition:background-color .15s ease}
-.phone .snd:hover{background:rgba(20,17,42,.92)}
+.phone .snd:hover{background:rgba(0,38,43,.92)}
 .reel figcaption{font-size:14px;color:var(--dim);text-align:center}
 .reel figcaption b{color:var(--ink);font-weight:600}
 .reel-note{position:relative;z-index:1;text-align:center;font-size:13px;color:var(--faint);margin:-40px 0 0;padding-bottom:36px}
@@ -161,7 +161,7 @@ h1 .hl{display:inline-block;background:var(--brand);color:var(--ink);padding:0 .
 .mock.result video{width:150px;aspect-ratio:9/16;border-radius:var(--r);object-fit:cover;background:var(--frame);display:block}
 .acts{display:flex;flex-direction:column;gap:8px}
 .acts span{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:var(--r);border:1px solid var(--line);font-weight:500;color:var(--text)}
-.acts span.pri{background:var(--brand);border-color:var(--brand);color:var(--ink)}
+.acts span.pri{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
 .mock .lab{font-size:12px;font-weight:600;color:var(--faint);margin-bottom:10px}
 .field{display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r);color:var(--text);margin-bottom:10px}
 .field svg{color:var(--faint)}
@@ -169,9 +169,9 @@ h1 .hl{display:inline-block;background:var(--brand);color:var(--ink);padding:0 .
 .chips{display:flex;gap:8px;margin-bottom:14px}
 .chips span{flex:1;height:36px;border-radius:var(--r);border:1px solid var(--line);display:grid;place-items:center;font-weight:500;color:var(--dim)}
 .chips span.on{background:var(--ink);border-color:var(--ink);color:#fff}
-.mock .go{height:44px;border-radius:var(--r);background:var(--brand);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600}
+.mock .go{height:44px;border-radius:var(--r);background:var(--brand);color:var(--on-brand);display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600}
 .src{display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--r);background:var(--soft);margin-bottom:14px}
-.src i{width:44px;height:44px;border-radius:var(--r-sm);background:linear-gradient(150deg,#B3A1FF,#6A48F5 55%,#1E1A3D);flex:none}
+.src i{width:44px;height:44px;border-radius:var(--r-sm);background:linear-gradient(150deg,#ABFFAE,#00262B 55%,#00191C);flex:none}
 .src b{display:block;font-weight:600;color:var(--ink)}.src span{font-size:12px;color:var(--dim)}
 .prog{display:flex;flex-direction:column;gap:10px;margin-bottom:6px}
 .prog div{display:flex;align-items:center;gap:10px;color:var(--faint)}
@@ -189,7 +189,7 @@ h1 .hl{display:inline-block;background:var(--brand);color:var(--ink);padding:0 .
 .cliprow .th{width:46px;aspect-ratio:9/16;border-radius:6px;flex:none}
 .cliprow b{display:block;font-weight:600;color:var(--ink)}
 .cliprow span{font-size:12px;color:var(--dim)}
-.cliprow .sc{margin-left:auto;font-weight:700;font-size:13px;background:var(--brand);color:var(--ink);padding:3px 9px;border-radius:999px}
+.cliprow .sc{margin-left:auto;font-weight:700;font-size:13px;background:var(--brand);color:var(--on-brand);padding:3px 9px;border-radius:999px}
 .judgebars{border-top:1px solid var(--line);padding-top:12px;margin-top:4px;display:flex;flex-direction:column;gap:9px}
 .jb{display:grid;grid-template-columns:120px 1fr 28px;gap:10px;align-items:center;font-size:12px;color:var(--dim)}
 .jb .t{height:6px;border-radius:99px;background:var(--muted);overflow:hidden}
@@ -253,7 +253,7 @@ summary::-webkit-details-marker{display:none}
 summary::after{content:"+";color:var(--faint);font-weight:400;font-size:24px;line-height:1;transition:transform .25s var(--ease)}
 details[open] summary::after{transform:rotate(45deg)}
 details p{color:var(--dim);margin-top:12px;font-size:16px}
-.closing{text-align:center;background:radial-gradient(ellipse 70% 90% at 50% 100%,#ECE7FF 0%,#F8F6FF 55%,#fff 85%);border-top:1px solid var(--line)}
+.closing{text-align:center;background:radial-gradient(ellipse 70% 90% at 50% 100%,#EAFDE8 0%,#F7FDF6 55%,#fff 85%);border-top:1px solid var(--line)}
 .closing h2{margin:0 auto;max-width:720px}.closing .sub{margin:10px auto 24px}
 
 
@@ -269,13 +269,13 @@ details p{color:var(--dim);margin-top:12px;font-size:16px}
   .step .no{left:20px;top:26px;transform:translateX(-50%)}
   .step:nth-child(even) .txt{order:0}.step .txt,.step:nth-child(odd) .txt{justify-self:start;max-width:none}.step:nth-child(even) .mock{justify-self:start}
 }
-@media (max-width:560px){.bar{border-radius:var(--r-lg);flex-basis:100%}.bar form{flex-direction:column;align-items:stretch}.bar .btn{width:100%;border-radius:var(--r)}.ask .or{display:none}.ask .up{width:100%;height:50px}header.nav .signin{display:none}.reel figure:not(.mid){display:none}.reel figure.mid{flex-basis:260px}.mock.result{grid-template-columns:110px 1fr}.mock.result video{width:110px}.trio b{font-size:36px}.notes span+span::before{display:none}}
+@media (max-width:560px){.bar{border-radius:var(--r-lg);flex-basis:100%}.bar form{flex-direction:column;align-items:stretch}.bar .btn{width:100%;border-radius:999px}.ask .or{display:none}.ask .up{width:100%;height:50px}header.nav .signin{display:none}.reel figure:not(.mid){display:none}.reel figure.mid{flex-basis:260px}.mock.result{grid-template-columns:110px 1fr}.mock.result video{width:110px}.trio b{font-size:36px}.notes span+span::before{display:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}.js .reveal,.js .ledger div{opacity:1;transform:none}.jb .t i{width:var(--v)}.meterbar i{width:70%}}
 </style>
 </head>
 <body>
 <header class="nav" id="nav"><div class="wrap">
-  <a href="/" aria-label="NeakClips home"><img src="/brand/neakclips-logo.svg" alt="NeakClips"></a>
+  <a href="/" aria-label="NeakClips home"><img src="/brand/neakclips-logo.svg?v=2" alt="NeakClips"></a>
   <nav aria-label="Sections"><a href="#how">How it works</a><a href="#features">Features</a><a href="#open">Open source</a><a href="#for">Who it's for</a><a href="#faq">FAQ</a></nav>
   <a class="btn primary cta" href="/login" data-auth="up">Sign in</a>
 </div></header>
@@ -385,7 +385,7 @@ details p{color:var(--dim);margin-top:12px;font-size:16px}
 
 <footer class="site"><div class="fwrap">
   <div class="fgrid">
-    <div class="fbrand"><a href="/" aria-label="NeakClips home"><img src="/brand/neakclips-logo-light.svg" alt="NeakClips" width="143" height="30"></a>
+    <div class="fbrand"><a href="/" aria-label="NeakClips home"><img src="/brand/neakclips-logo-light.svg?v=2" alt="NeakClips" width="143" height="30"></a>
       <p>AI clipping for Twitch, Kick and YouTube streams. Captioned vertical clips while the stream is still live. Free and open source.</p>
       <a class="fcta" href="/login">Sign in</a></div>
     <div><h4>Product</h4><ul><li><a href="/#how">How it works</a></li><li><a href="/#features">Features</a></li><li><a href="/#live">Live clipping</a></li><li><a href="/#open">Open source</a></li><li><a href="/#faq">FAQ</a></li></ul></div>
@@ -400,7 +400,7 @@ details p{color:var(--dim);margin-top:12px;font-size:16px}
 const _y = document.getElementById("year"); if (_y) _y.textContent = new Date().getFullYear();
 const navEl = document.getElementById("nav");
 addEventListener("scroll", () => navEl.classList.toggle("stuck", scrollY > 4), {passive:true});
-const startAscii = () => { try { GradientASCII(document.getElementById("heroAscii"), {colors: ["#B3A1FF", "#ffffff", "#D3C7FF", "#E2DAFF", "#F3EFFF"], shape: "horizon", lightMode: true, cellSize: 16, density: 0.8, glyphOpacity: 0.26, gradientOpacity: 0.32, glow: 0.06, grain: 0.06, mouseInteraction: false, clickEffect: "none"}); } catch {} };
+const startAscii = () => { try { GradientASCII(document.getElementById("heroAscii"), {colors: ["#ABFFAE", "#ffffff", "#CDE3E5", "#D9FBD7", "#F2FBF1"], shape: "horizon", lightMode: true, cellSize: 16, density: 0.8, glyphOpacity: 0.26, gradientOpacity: 0.32, glow: 0.06, grain: 0.06, mouseInteraction: false, clickEffect: "none"}); } catch {} };
 window.GradientASCII ? startAscii() : addEventListener("load", startAscii, {once:true});
 try {
   const lz = new IntersectionObserver(es => es.forEach(e => { const v = e.target; if (e.isIntersecting) { v.preload = "auto"; v.play().catch(() => {}); } else v.pause(); }), {threshold:.4});
