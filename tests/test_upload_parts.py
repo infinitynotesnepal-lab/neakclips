@@ -18,8 +18,8 @@ def check(name, ok, extra=""):
 
 
 def user(email):
-    c = httpx.Client(base_url=B, headers={"Origin": B}, timeout=120)
-    c.post("/api/auth/signup", json={"email": email, "password": "test-pass-123", "name": "U"})
+    from _people import join
+    c, _u = join(B, email, name="U", headers={"Origin": B}, timeout=120)
     return c
 
 
@@ -35,7 +35,8 @@ from studio import db                          # noqa: E402
 db.init()
 with db.engine.begin() as cn:
     for (uid,) in cn.execute(sa.select(db.users.c.id).where(db.users.c.email.like("pieces-%"))).all():
-        cn.execute(db.email_ok.insert().values(user_id=uid, verified_at=time.time()))
+        if not cn.execute(sa.select(db.email_ok.c.user_id).where(db.email_ok.c.user_id == uid)).first():   # invited: already confirmed
+            cn.execute(db.email_ok.insert().values(user_id=uid, verified_at=time.time()))
 st = a.get("/api/status").json()
 part_mb = st["upload_part_mb"]
 data = os.urandom(int(part_mb * 1024 * 1024 * 2.4))            # two full pieces and a shorter last one
@@ -69,7 +70,9 @@ limit = st["max_upload_mb"] * 1024 * 1024
 check("a file over the limit is refused before anything is sent", a.post("/api/upload/start", json={"name": "x.mp4", "size": limit + 1}).status_code == 413)
 check("a file that is not a video is refused", a.post("/api/upload/start", json={"name": "x.exe", "size": 5000}).status_code == 400)
 check("a made-up size is refused", a.post("/api/upload/start", json={"name": "x.mp4", "size": -4}).status_code == 400)
-check("without signing in nothing can be started", httpx.post(B + "/api/upload/start", json={"name": "x.mp4", "size": 10}, headers={"Origin": B}).status_code == 401)
+from _people import client as _signed_out  # noqa: E402
+check("without signing in nothing can be started", _signed_out(B).post("/api/upload/start", json={"name": "x.mp4", "size": 10}, headers={"Origin": B}).status_code == 401)
+check("...nor from another site", httpx.post(B + "/api/upload/start", json={"name": "x.mp4", "size": 10}, headers={"Origin": B}).status_code == 403)
 big = a.put(f"/api/upload/{'0' * 24}/0", content=b"x" * ((part_mb + 9) * 1024 * 1024), headers=H)
 check("an oversized request to the pieces address is cut off", big.status_code == 413, str(big.status_code))
 c = a.post("/api/upload/start", json={"name": "y.mp4", "size": 1000}).json()

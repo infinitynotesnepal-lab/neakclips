@@ -1,6 +1,6 @@
-"""Turn NVIDIA's Arabic speech model into the files PeakCut's speech library reads, and try it on real videos.
+"""Turn NVIDIA's Arabic speech model into the files NeakClips' speech library reads, and try it on real videos.
 
-This is run once by whoever publishes the Arabic model, not by people using PeakCut. PeakCut itself only downloads
+This is run once by whoever publishes the Arabic model, not by people using NeakClips. NeakClips itself only downloads
 the finished archive this makes.
 
   1. Make the model files (needs a separate Python with NVIDIA's NeMo toolkit; Linux or Google Colab is easiest):
@@ -8,13 +8,13 @@ the finished archive this makes.
        python tools/export_arabic_model.py export
      This writes sherpa-onnx-nemo-fastconformer-ar-int8/ and sherpa-onnx-nemo-fastconformer-ar-int8.tar.bz2.
 
-  2. Try it on a few Arabic videos or audio files (in PeakCut's own Python, with ffmpeg):
+  2. Try it on a few Arabic videos or audio files (in NeakClips' own Python, with ffmpeg):
        python tools/export_arabic_model.py try sherpa-onnx-nemo-fastconformer-ar-int8 news.mp4 vlog.mp4 ...
      It prints what it heard, with the time of each word, so you can judge it by eye.
 
 The way the model is exported follows the sherpa-onnx project's own recipe for this family of NVIDIA models
 (scripts/nemo/fast-conformer-hybrid-transducer-ctc in github.com/k2-fsa/sherpa-onnx, Apache 2.0). Only the
-"transducer" half of the model is kept: it is the same kind PeakCut already uses for English.
+"transducer" half of the model is kept: it is the same kind NeakClips already uses for English.
 
 The model is NVIDIA's stt_ar_fastconformer_hybrid_large_pc_v1.0 (Arabic with punctuation, no vowel marks),
 licensed CC-BY-4.0: it may be shared and used commercially as long as NVIDIA is credited, which the README inside
@@ -41,7 +41,7 @@ tags:
 - nemo
 ---
 
-# Arabic speech model for PeakCut
+# Arabic speech model for NeakClips
 
 Converted for sherpa-onnx from NVIDIA's **{SOURCE}**
 (https://huggingface.co/{SOURCE}), released by NVIDIA under the
@@ -82,7 +82,7 @@ def export(out: Path):
     starts = sum(1 for s in vocab if s.startswith("▁"))
     print(f"Word list: {len(vocab)} pieces, {starts} of them start a word with '▁'.")
     if not starts:
-        print("WARNING: no piece starts with '▁'. PeakCut finds word boundaries that way, so check before publishing.")
+        print("WARNING: no piece starts with '▁'. NeakClips finds word boundaries that way, so check before publishing.")
 
     model.change_decoding_strategy(decoder_type="rnnt")
     model.eval()
@@ -113,7 +113,7 @@ def export(out: Path):
 
     archive = out.parent / f"{NAME}.tar.bz2"
     with tarfile.open(archive, "w:bz2") as t:
-        t.add(out, arcname=NAME)       # PeakCut expects one folder named after the model inside the archive
+        t.add(out, arcname=NAME)       # NeakClips expects one folder named after the model inside the archive
     size = sum(p.stat().st_size for p in out.iterdir()) / 1e6
     print(f"Done: {out} ({size:.0f} MB), packed as {archive} ({archive.stat().st_size / 1e6:.0f} MB).")
 
@@ -132,7 +132,7 @@ def try_files(folder: Path, files: list):
 
 
 def _try_one(rec, transcribe, media, f: Path, wav: Path):
-    media.extract_audio(f, wav)            # any video or audio file -> 16 kHz mono, as PeakCut does
+    media.extract_audio(f, wav)            # any video or audio file -> 16 kHz mono, as NeakClips does
     audio = media.load_audio(wav)
     took = time.time()
     words = []
@@ -140,7 +140,7 @@ def _try_one(rec, transcribe, media, f: Path, wav: Path):
         seg = audio[a:b].astype("float32") / 32768.0
         if len(seg) < 4800:
             continue
-        st = rec.create_stream()           # decoded here directly, so PeakCut's own English model is never touched
+        st = rec.create_stream()           # decoded here directly, so NeakClips' own English model is never touched
         st.accept_waveform(16000, seg)
         rec.decode_stream(st)
         words += transcribe._words(list(st.result.tokens), [float(t) for t in st.result.timestamps], a, b)

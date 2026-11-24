@@ -2,7 +2,7 @@
 
     python tests/run.py
 
-Starts PeakCut on a spare port with an empty, temporary data folder, runs the tests against it, then stops it and
+Starts NeakClips on a spare port with an empty, temporary data folder, runs the tests against it, then stops it and
 deletes the folder. Your real data and your running server are never touched. No AI key is needed: the tests cover accounts, permissions, limits and the queue, not clip quality."""
 import os
 import shutil
@@ -46,6 +46,8 @@ def main() -> int:
             print("The test server did not start.")
             return 1
         runs = [("permissions", ["tests/test_permissions.py", BASE, str(ROOT), sys.executable]),
+                ("invitations, account management, CSRF and private data", ["tests/test_invites.py", BASE, str(ROOT)]),
+                ("each person's own Gemini key, encrypted", ["tests/test_own_keys.py"]),
                 ("abuse and limits", ["tests/test_abuse.py", BASE, str(ROOT)]),
                 ("queue under load", ["tests/test_load_queue.py", str(ROOT)]),
                 ("a day-long video in little memory", ["tests/test_longvideo.py"]),

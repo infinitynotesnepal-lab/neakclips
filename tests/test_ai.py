@@ -7,6 +7,7 @@ import tempfile
 
 os.environ["PEAKCUT_DATA"] = tempfile.mkdtemp(prefix="pc-ai-")
 os.environ["DATABASE_URL"] = ""
+os.environ["PEAKCUT_ACCOUNTS"] = "0"     # the AI layer itself, with one owner; tests/test_own_keys.py covers each person's own key
 os.environ.update(PEAKCUT_AI_PROVIDER="gemini", PEAKCUT_AI_MODELS="model-a, model-b", PEAKCUT_AI_KEY="test-key-123456", PEAKCUT_AI_BASE_URL="")
 sys.path.insert(0, ".")
 from studio import ai, auth, brain, config, ctx, db, usage  # noqa: E402

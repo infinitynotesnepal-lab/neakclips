@@ -92,7 +92,7 @@ check("out of quota", ai.explain("HTTP 429 You exceeded your current quota"), la
 check("cannot be reached", ai.explain("[Errno 11001] getaddrinfo failed"), lambda s: "couldn't reach" in s)
 check("anything else is not guessed at", ai.explain("something odd"), "")
 ai.note_problem("HTTP 404 model not found")
-check("the reason is kept for the dashboard, and cleared when the AI answers again", (bool(ai.problem["text"]), (ai.clear_problem(), ai.problem["text"])[1]), (True, ""))
+check("the reason is kept for the dashboard, and cleared when the AI answers again", (bool(ai.problem_text()), (ai.clear_problem(), ai.problem_text())[1]), (True, ""))
 
 print("ALL PASSED" if not fails else f"{len(fails)} failed")
 shutil.rmtree(os.environ["PEAKCUT_DATA"], ignore_errors=True); shutil.rmtree(hidden, ignore_errors=True)

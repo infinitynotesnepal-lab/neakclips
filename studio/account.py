@@ -170,5 +170,7 @@ def delete_account(uid: str) -> dict:
     from . import posting
     posting.forget(uid)                            # scheduled posts must not outlive the account that owns them
     usage.forget(uid)
+    from . import ai
+    ai.forget(uid)                                 # their AI key was deleted with the account: drop the copy in memory too
     shutil.rmtree(config.user_dir(uid), ignore_errors=True)
     return {"ok": True}

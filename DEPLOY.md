@@ -1,6 +1,6 @@
-# Putting PeakCut on a server
+# Putting NeakClips on a server
 
-PeakCut runs as three containers on one Linux server: the app, PostgreSQL, and Caddy (which handles HTTPS).
+NeakClips runs as three containers on one Linux server: the app, PostgreSQL, and Caddy (which handles HTTPS).
 
 ## What you need
 
@@ -14,15 +14,22 @@ PeakCut runs as three containers on one Linux server: the app, PostgreSQL, and C
 
 1. Copy this folder to the server (or `git clone` it there).
 2. `cp .env.example .env` and fill it in: the AI lines, `PEAKCUT_DOMAIN`, `POSTGRES_PASSWORD`, and
-   `COMPOSE_PROFILES=own-https` if the server is PeakCut's alone. Put key files, if you use files, in `./secrets/`.
+   `COMPOSE_PROFILES=own-https` if the server is NeakClips' alone. Put key files, if you use files, in `./secrets/`.
 3. `docker compose up -d --build`
    The first start downloads the speech model (about 480 MB) and creates the database tables.
-4. Open `https://your-domain` and sign up. With Docker, accounts are on (`PEAKCUT_ACCOUNTS=1`), so everyone signs in.
-   Every new account is a normal user.
+4. Invite yourself, on the server: `docker compose exec app python -m studio.admin invite you@example.com`
+   Open the link it prints, choose your name and password. With Docker, accounts are on (`PEAKCUT_ACCOUNTS=1`):
+   there is no sign-up page, and every account comes from an invitation.
 5. Make yourself an admin, on the server: `docker compose exec app python -m studio.admin grant you@example.com`
    The admin dashboard is then at `https://your-domain/admin`. It answers "not found" for everyone who is not an
    admin, and no page or web request can make someone an admin: only that command can.
-6. Sign in as that admin, open **Settings, AI**, and add your AI key there (or put it in `.env`).
+6. Invite everyone else from **Admin, Invitations**. Each link works once, only for the email it was made for,
+   for 24 hours, 3 days or 7 days. Each person adds their own Gemini API key under **Settings, API settings**;
+   it is used only for their own videos, kept encrypted, and never shown to anyone, admins included.
+7. Keep `PEAKCUT_SECRET_KEY_FILE` (the key that encrypts the saved AI keys) outside the data folder, and back it up
+   separately from the database. Upgrading an older NeakClips: `python -m studio.migrate --check` shows what will
+   change; the same runs by itself at start, adds the new tables and moves an old plain-text AI key into the
+   encrypted store. No existing table, account, video or clip is changed or removed.
 
 ## Connecting YouTube, Instagram and TikTok
 
@@ -37,7 +44,7 @@ them in `.env`, see `.env.example`). The redirect address to register is shown i
   Creator and Business accounts. Until Meta reviews the app, only accounts added as testers can connect. Instagram
   fetches each clip from a one-hour signed link on your site, so the site needs a public https address.
 - **TikTok** (TikTok for Developers): an app with Login Kit and the Content Posting API (Direct Post), scopes
-  `user.info.basic` and `video.publish`. Until TikTok audits the app, clips are posted as private (PeakCut does
+  `user.info.basic` and `video.publish`. Until TikTok audits the app, clips are posted as private (NeakClips does
   this by itself and says so on the account).
 
 Instagram and TikTok only accept https redirect addresses.
@@ -67,7 +74,7 @@ Without SMTP on an HTTPS site, no reset emails can be sent.
 - **One server only**: jobs and live recordings run inside the app process. Do not start a second copy of the app
   against the same data.
 - **YouTube downloads from data centres** are sometimes refused by YouTube ("confirm you're not a bot"). If links
-  fail on the server but work at home, the server's address is the cause. PeakCut then pauses YouTube links for a
+  fail on the server but work at home, the server's address is the cause. NeakClips then pauses YouTube links for a
   few minutes and says so; uploads and Twitch or Kick links keep working.
 - **Updates**: `git pull && docker compose up -d --build`. A restart pauses videos in progress (they pick up
   where they stopped) and live recordings (clips already found are finished from the saved stream).
@@ -76,7 +83,7 @@ Without SMTP on an HTTPS site, no reset emails can be sent.
 
 ## A server that already runs other sites
 
-Leave `COMPOSE_PROFILES=own-https` out of `.env`. PeakCut then listens only on `127.0.0.1:8765` and the web
+Leave `COMPOSE_PROFILES=own-https` out of `.env`. NeakClips then listens only on `127.0.0.1:8765` and the web
 server that is already there forwards the domain to it: see `deploy/nginx-peakcut.conf`, or
 `deploy/docker-compose.traefik.yml` for Traefik.
 
@@ -90,7 +97,7 @@ With the record proxied (orange cloud):
   pages, clips and the API send `private` or `no-store` and are never cached by Cloudflare.
 - Use SSL/TLS mode Full (strict) with a Cloudflare origin certificate in `secrets/` and
   `PEAKCUT_CADDYFILE=Caddyfile.origin`.
-- Cloudflare's standard plans refuse requests over 100 MB. PeakCut sends big uploads in pieces
+- Cloudflare's standard plans refuse requests over 100 MB. NeakClips sends big uploads in pieces
   (`PEAKCUT_UPLOAD_PART_MB`, 40 by default), so large files still work.
 
 ## Speech to text on a graphics card

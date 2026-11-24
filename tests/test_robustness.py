@@ -31,7 +31,7 @@ with ctx.as_user(a.id):
     check("...and the newest line survived the cut", creators.read_log(c["id"], 1)[0]["msg"] == "after the big one")
 
 # ---------------------------------------------------------------- the machine monitor on this computer
-# The processor and memory readings are written per platform. On one PeakCut cannot measure, free memory falls
+# The processor and memory readings are written per platform. On one NeakClips cannot measure, free memory falls
 # back to a fixed 99.0 GB and the processor reads 0 forever, so busy() never fires and the guard that holds new
 # videos back while the machine is full is silently off. These two checks are what notice that.
 try:                      # macOS updates these counts lazily, so wait for them to move rather than assume a gap

@@ -1,4 +1,4 @@
-"""PeakCut web server. Run with:  python -m studio.server
+"""NeakClips web server. Run with:  python -m studio.server
 
 Public pages:  /  /login  /signup          The app:  /app  (signed-in users only)
 Everything under /api, /media and /oauth needs a session, except /api/auth/* and /api/public."""
@@ -9,6 +9,7 @@ import ipaddress
 import json
 import os
 import re
+import secrets
 import shutil
 import threading
 import time
@@ -22,7 +23,7 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 
 from . import admin as admins
-from . import account, load
+from . import account, invites, load
 from . import (accounts, ai, alerts, auth, brain, config, creators, ctx, db, jobs, live, media, posting,
                profiles, render, safe, transcribe, usage)
 
@@ -36,9 +37,13 @@ def _quiet(fn):
         print(f"  {e}", flush=True)
 
 
-app = FastAPI(title="PeakCut", docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(title="NeakClips", docs_url=None, redoc_url=None, openapi_url=None)
 WEB = config.ROOT / "web"
-OPEN = ("/api/auth/", "/pub/", "/api/public", "/auth/google/", "/auth/verify", "/brand/", "/assets/", "/healthz", "/favicon.ico", "/robots.txt", "/sitemap.xml")
+OPEN = ("/api/auth/", "/pub/", "/api/public", "/auth/google/", "/auth/verify", "/invite/", "/brand/", "/assets/", "/healthz", "/favicon.ico", "/robots.txt", "/sitemap.xml")
+# Every change (anything but GET) must carry this cookie's value back in a header. Another website can make a browser
+# send the cookie, but cannot read it, so it cannot copy it into the header: its requests are refused.
+CSRF_COOKIE, CSRF_HEADER = "peakcut_csrf", "x-csrf-token"
+_CSRF_OK = re.compile(r"[A-Za-z0-9_\-]{32,100}")
 PAGES = {"/": "landing.html", "/login": "auth.html", "/signup": "auth.html", "/reset": "reset.html",
          "/privacy": "legal.html", "/terms": "legal.html", "/acceptable-use": "legal.html"}
 VIDEO_TYPES = {".mp4", ".mov", ".mkv", ".webm", ".m4v", ".ts", ".flv"}
@@ -60,6 +65,12 @@ async def _more_threads():
 @app.on_event("startup")
 def _startup():
     db.init()
+    from . import migrate
+    _quiet(lambda: migrate.run(apply=True, quiet=True))    # new tables, and an old plain-text AI key moved to the encrypted store
+    if config.ACCOUNTS and not config.env("PEAKCUT_SECRET_KEY") and \
+            config.ROOT.resolve() in Path(config.SECRET_KEY_FILE).resolve().parents:
+        print(f"  The key that encrypts saved AI keys is inside NeakClips' folder ({config.SECRET_KEY_FILE}).\n"
+              "  On a server, set PEAKCUT_SECRET_KEY_FILE to a file outside it, such as /etc/peakcut/secret.key.", flush=True)
     for f in (config.TMP_DIR / "uploads").glob("*"):      # uploads cut short by a restart
         try:
             f.unlink()
@@ -75,7 +86,7 @@ def _startup():
     live.start()
     posting.start()
     from . import updates
-    updates.start()                  # looks for a newer PeakCut every minute, in the background
+    updates.start()                  # looks for a newer NeakClips every minute, in the background
 
 
 # ================================================================ the gate: who is asking, and are they allowed
@@ -121,6 +132,13 @@ class Gate:
                         raise HTTPException(413, "That request is too large.")
                 return m
 
+            if config.ACCOUNTS:
+                # The page copies the CSRF cookie into a header (web/csrf.js). Another site cannot read the cookie.
+                sent = (req.headers.get(CSRF_HEADER) or "").encode("ascii", "replace")
+                have = (req.cookies.get(CSRF_COOKIE) or "").encode("ascii", "replace")
+                if not have or not sent or not hmac.compare_digest(sent, have):
+                    return await deny(403, "This page is out of date. Reload it and try again.")
+
         is_open = path in PAGES or any(path.startswith(p) for p in OPEN)
         admin_area = path == "/admin" or path.startswith(("/admin/", "/api/admin/"))
         if config.ACCOUNTS:
@@ -133,8 +151,8 @@ class Gate:
             # must have been asked for by its real address (a number, "localhost", or the address in settings),
             # so another website cannot reach it through a made-up name that points at this machine.
             if not _own_address(req.headers.get("host", "")):
-                return await deny(403, "Open PeakCut by its own address.")
-            if path == "/" or path == "/reset" or path.startswith("/auth/"):
+                return await deny(403, "Open NeakClips by its own address.")
+            if path == "/" or path == "/reset" or path.startswith(("/auth/", "/invite/")):
                 return await deny(303, "", redirect="/app")
             if path.startswith("/api/auth/") and path != "/api/auth/me":
                 return await deny(404, "Not Found")
@@ -167,6 +185,9 @@ class Gate:
             await run_in_threadpool(auth.touch, user.id)
 
         unchanged = False
+        csrf_new = None
+        if config.ACCOUNTS and not _CSRF_OK.fullmatch(req.cookies.get(CSRF_COOKIE) or ""):
+            csrf_new = secrets.token_urlsafe(32)
 
         async def send_with_headers(message):
             nonlocal unchanged
@@ -184,17 +205,22 @@ class Gate:
                         message["status"] = 304
                         h[:] = [(k, v) for k, v in h if k.lower() not in (b"content-length", b"content-type", b"content-encoding")]
                 h += [(b"x-content-type-options", b"nosniff"), (b"x-frame-options", b"DENY"),
-                      (b"referrer-policy", b"strict-origin-when-cross-origin"), (b"content-security-policy", CSP.encode()),
+                      (b"content-security-policy", CSP.encode()),
                       (b"permissions-policy", b"camera=(), microphone=(), geolocation=()")]
+                if not any(k.lower() == b"referrer-policy" for k, _ in h):     # a page may ask for a stricter one (invite)
+                    h.append((b"referrer-policy", b"strict-origin-when-cross-origin"))
                 if config.HTTPS:
                     h.append((b"strict-transport-security", b"max-age=31536000; includeSubDomains"))
+                if csrf_new:
+                    h.append((b"set-cookie", (f"{CSRF_COOKIE}={csrf_new}; Path=/; Max-Age={config.SESSION_DAYS * 86400}; "
+                                              f"SameSite=Strict{'; Secure' if config.HTTPS else ''}").encode()))
                 if path.startswith("/api/"):
                     h.append((b"cache-control", b"no-store"))
                 elif message.get("status", 200) >= 300 and not any(k.lower() == b"cache-control" for k, _ in h):
                     # redirects and errors are never kept by a CDN: a "not found" for a clip that is still being
                     # made, or a sign-in redirect, must not be shown to anyone later
                     h.append((b"cache-control", b"private, no-store"))
-                if path.startswith(("/app", "/admin", "/api/", "/auth/", "/reset", "/media/")):
+                if path.startswith(("/app", "/admin", "/api/", "/auth/", "/reset", "/media/", "/invite/")):
                     h.append((b"x-robots-tag", b"noindex, nofollow"))
             await send(message)
 
@@ -250,7 +276,7 @@ def _from_cdn(addr: str) -> bool:
     return any(ip in n for n in _CDN_RANGES)
 
 
-# Private and local addresses: the only places a reverse proxy in front of PeakCut can sit.
+# Private and local addresses: the only places a reverse proxy in front of NeakClips can sit.
 _PROXY_CIDRS = ("127.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "100.64.0.0/10", "169.254.0.0/16",
                 "::1/128", "fc00::/7", "fe80::/10")
 _PROXY_RANGES = [ipaddress.ip_network(r) for r in _PROXY_CIDRS]
@@ -299,7 +325,7 @@ def _ip(request: Request) -> str:
 
 
 def _from_here(req, must_say=False) -> bool:
-    """Did this change come from PeakCut's own page, and not from another website?
+    """Did this change come from NeakClips' own page, and not from another website?
 
     The browser's own answer is trusted first: it marks every request "same-origin" or not, and a web page cannot
     fake that mark. Comparing the page's address with the address the request arrived at is only the fallback,
@@ -314,7 +340,7 @@ def _from_here(req, must_say=False) -> bool:
 
 
 def _own_address(host: str) -> bool:
-    """Is this the address PeakCut is really reached by? A number (127.0.0.1, 192.168.1.20), "localhost", or the
+    """Is this the address NeakClips is really reached by? A number (127.0.0.1, 192.168.1.20), "localhost", or the
     host in PEAKCUT_PUBLIC_URL."""
     import ipaddress
     name = host.strip().lower()
@@ -387,9 +413,21 @@ def sitemap():
 
 
 @app.get("/login")
-@app.get("/signup")
 def auth_page():
     return _page("auth.html", shared=True)
+
+
+@app.get("/signup")
+def signup_page():
+    """There is no sign-up: accounts are made from invitations. The old address goes to sign-in."""
+    return RedirectResponse("/login?invite_only=1", 303)
+
+
+@app.get("/invite/{token}")
+def invite_page(token: str):
+    """The page that finishes an invitation. The link itself is checked by the page (and again when the form is sent),
+    so the token is never written into the HTML, kept by a cache, or passed on to another site."""
+    return FileResponse(WEB / "invite.html", headers={"Cache-Control": "private, no-store", "Referrer-Policy": "no-referrer"})
 
 
 @app.get("/reset")
@@ -398,9 +436,9 @@ def reset_page():
 
 
 LEGAL = {
-    "privacy": ("Privacy Policy", "How PeakCut collects, uses and protects your data, including Google user data, cookies and your privacy rights."),
-    "terms": ("Terms of Service", "The terms for using PeakCut, the AI clipping tool for streams and videos: accounts, availability and liability."),
-    "acceptable-use": ("Acceptable Use Policy", "What you may and may not do with PeakCut, the AI stream clipping tool."),
+    "privacy": ("Privacy Policy", "How NeakClips collects, uses and protects your data, including Google user data, cookies and your privacy rights."),
+    "terms": ("Terms of Service", "The terms for using NeakClips, the AI clipping tool for streams and videos: accounts, availability and liability."),
+    "acceptable-use": ("Acceptable Use Policy", "What you may and may not do with NeakClips, the AI stream clipping tool."),
 }
 
 
@@ -415,9 +453,9 @@ def legal_page(request: Request):
     contact = config.CONTACT_EMAIL
     who = (f'<a href="mailto:{_h.escape(contact)}">{_h.escape(contact)}</a>' if contact
            else "the contact details on our website")
-    name = _h.escape(config.LEGAL_NAME or "PeakCut")
+    name = _h.escape(config.LEGAL_NAME or "NeakClips")
     law = (f"the laws of {_h.escape(config.LEGAL_COUNTRY)}" if config.LEGAL_COUNTRY
-           else "the laws of the country where PeakCut's operator is established")
+           else "the laws of the country where NeakClips' operator is established")
     out = (_LEGAL_HTML or (WEB / "legal.html").read_text(encoding="utf-8"))
     for k, v in {"{{CONTACT}}": who, "{{PAGE}}": page, "{{PAGE_PATH}}": page, "{{SITE}}": _h.escape(config.PUBLIC_URL),
                  "{{NAME}}": name, "{{LAW}}": law, "{{TITLE}}": title, "{{DESC}}": desc}.items():
@@ -472,7 +510,7 @@ def favicon():
 @app.get("/api/public")
 def public_config():
     from . import mailer
-    return {"google": auth.google_ready(), "mail": mailer.ready(), "verify_email": config.VERIFY_EMAIL}
+    return {"google": auth.google_ready(), "mail": mailer.ready(), "verify_email": config.VERIFY_EMAIL, "invite_only": config.ACCOUNTS}
 
 
 def _signed_in(request: Request, user, first: bool, redirect=None):
@@ -483,15 +521,53 @@ def _signed_in(request: Request, user, first: bool, redirect=None):
 
 
 @app.post("/api/auth/signup")
-def signup(request: Request, body: dict = Body(...)):
+def signup(request: Request):
+    """Public sign-up is switched off: the only way in is an invitation from an admin."""
+    raise HTTPException(403, auth.INVITE_ONLY)
+
+
+# ---------------------------------------------------------------- invitations: the only way a new account is made
+# Only failed attempts count towards these limits: someone guessing links is stopped, people joining are not.
+INVITE_TRIES = ((lambda ip, tok: "invite-ip:" + ip, 20, 900),
+                (lambda ip, tok: "invite-token:" + hashlib.sha256(tok.encode()).hexdigest(), 8, 900))
+
+
+def _invite_guard(request: Request, token: str, failed: bool = False):
+    for key, limit, window in INVITE_TRIES:
+        try:
+            auth.throttle(key(_ip(request), token), limit, window, record=failed)
+        except auth.AuthError as e:
+            if not failed:
+                raise HTTPException(429, str(e))
+
+
+@app.post("/api/auth/invite/check")
+def invite_check(request: Request, body: dict = Body(...)):
+    token = str(body.get("token") or "")
+    _invite_guard(request, token)
     try:
-        auth.throttle("signup:" + _ip(request), 8, 3600)
-        user, first = auth.signup(str(body.get("email", "")), str(body.get("password", "")), str(body.get("name", "")))
-    except auth.AuthError as e:
-        raise HTTPException(400, str(e))
-    if not auth.is_verified(user.id):
-        auth.send_verify(user)
-    return _signed_in(request, user, first)
+        return invites.check(token)
+    except invites.InviteError as e:
+        _invite_guard(request, token, failed=True)
+        raise HTTPException(e.status, str(e))
+
+
+@app.post("/api/auth/invite/accept")
+def invite_accept(request: Request, body: dict = Body(...)):
+    token = str(body.get("token") or "")
+    _invite_guard(request, token)
+    _throttle("invite-use:" + _ip(request), 60, 3600, "Too many attempts. Wait a few minutes and try again.")
+    try:
+        user = invites.accept(token, body.get("name"), body.get("password"), body.get("confirm"),
+                              email_claim=body.get("email"), ip=_ip(request))
+    except invites.InviteError as e:
+        _invite_guard(request, token, failed=True)
+        raise HTTPException(e.status, str(e))
+    old = request.cookies.get(auth.COOKIE, "")
+    if old:                                   # whoever was signed in on this browser before is signed out of it
+        auth.end_session(old)
+    auth.note(user.id, "login", _ip(request), "first sign-in")
+    return _signed_in(request, user, False)
 
 
 @app.post("/api/auth/resend-verification")
@@ -537,6 +613,9 @@ def reset_password(request: Request, body: dict = Body(...)):
         user = auth.reset_password(str(body.get("token", "")), str(body.get("password", "")))
     except auth.AuthError as e:
         raise HTTPException(400, str(e))
+    if user.disabled:
+        raise HTTPException(400, "This account has been disabled.")
+    auth.note(user.id, "password_reset", _ip(request))
     return _signed_in(request, user, False)
 
 
@@ -549,12 +628,20 @@ def login(request: Request, body: dict = Body(...)):
         auth.throttle("login:" + email.strip().lower()[:254], 60, 600)
         user = auth.login(email, str(body.get("password", "")))
     except auth.AuthError as e:
-        raise HTTPException(400, str(e))
+        if "match" in str(e):                 # a wrong password for a real account is worth showing to admins
+            known = auth.user_by_email(email)
+            if known:
+                auth.note(known.id, "login_failed", _ip(request))
+        raise HTTPException(429 if "Too many" in str(e) else 400, str(e))
+    auth.note(user.id, "login", _ip(request))
     return _signed_in(request, user, False)
 
 
 @app.post("/api/auth/logout")
 def logout(request: Request):
+    who = auth.user_for(request.cookies.get(auth.COOKIE, ""))
+    if who:
+        auth.note(who.id, "logout", _ip(request))
     auth.end_session(request.cookies.get(auth.COOKIE, ""))
     resp = JSONResponse({"ok": True})
     resp.delete_cookie(auth.COOKIE, path="/")
@@ -576,6 +663,7 @@ def change_password(request: Request, body: dict = Body(...)):
                              keep_token=request.cookies.get(auth.COOKIE, ""))
     except auth.AuthError as e:
         raise HTTPException(400, str(e))
+    auth.note(_me(request).id, "password_changed", _ip(request))
     return {"ok": True}
 
 
@@ -1158,7 +1246,7 @@ def email_preview(request: Request, kind: str = "verify"):
     from . import mailer
     _admin(request)
     if kind == "reset":
-        page = mailer.preview("Reset your password", "Someone asked to reset the password for this PeakCut account. If that was you, choose a new one below.",
+        page = mailer.preview("Reset your password", "Someone asked to reset the password for this NeakClips account. If that was you, choose a new one below.",
                               "Choose a new password", config.PUBLIC_URL + "/reset?t=example",
                               "The link works for one hour. If you didn't ask for this, ignore this email and your password stays the same.")
     else:
@@ -1173,9 +1261,9 @@ def test_email(request: Request):
     me_ = _admin(request)
     if not mailer.ready():
         raise HTTPException(400, "No email service is set up yet. Add the PEAKCUT_SMTP settings to .env first.")
-    mailer.send(me_.email, "PeakCut test email", "Your emails are working",
-                "This is a test from your PeakCut server. Account emails like this one will now reach people.",
-                "Open PeakCut", config.PUBLIC_URL + "/app", "You can ignore this message.")
+    mailer.send(me_.email, "NeakClips test email", "Your emails are working",
+                "This is a test from your NeakClips server. Account emails like this one will now reach people.",
+                "Open NeakClips", config.PUBLIC_URL + "/app", "You can ignore this message.")
     return {"sent_to": me_.email}
 
 
@@ -1353,56 +1441,89 @@ def ai_usage():
     return usage.summary({c["id"]: c["name"] for c in creators.all_creators()})
 
 
-# ---------------------------------------------------------------- the AI key and model, set from the dashboard
-# Only the owner (or an admin, when accounts are on) reaches these. The key is never sent back to the page.
-def _ai_error(e) -> str:
-    return safe.friendly(e, 300).replace(ai.key() or "\0", "<key>")
+# ---------------------------------------------------------------- the AI key and model, set from the dashboard (API settings)
+# With sign-in on, every person manages their own Gemini key here, and only their own: who they are comes from their
+# session, never from the request. With sign-in off, only the owner reaches these. The key is never sent back to the
+# page, never written to a log, and never shown to admins: the page gets a masked form (first and last four).
+def _ai_owner(request: Request):
+    u = getattr(request.state, "user", None)
+    if not u:
+        raise HTTPException(401, "Please sign in.")
+    if not config.ACCOUNTS:
+        _admin(request)
+    return u
+
+
+def _ai_error(e, *extra) -> str:
+    return ai._hide(safe.friendly(e, 300), ai.key(), *extra)
 
 
 @app.get("/api/ai")
 def ai_get(request: Request):
-    _admin(request)
+    _ai_owner(request)
     return ai.public()
 
 
 @app.put("/api/ai")
 def ai_put(request: Request, body: dict = Body(...)):
-    _admin(request)
+    me_ = _ai_owner(request)
+    _throttle("aisave:" + me_.id, 30, 600)
     k = body.get("key")
     try:
-        out = ai.save(body.get("provider"), body.get("models"), body.get("base_url") or "",
-                      None if k is None or (isinstance(k, str) and not k.strip() and not body.get("remove_key")) else str(k))
+        if body.get("remove_key") and config.ACCOUNTS:
+            out = ai.remove_key()
+        else:
+            out = ai.save(body.get("provider") or ("gemini" if config.ACCOUNTS else None), body.get("models"),
+                          body.get("base_url") or "",
+                          None if k is None or (isinstance(k, str) and not k.strip() and not body.get("remove_key")) else str(k))
     except (ValueError, TypeError) as e:
         raise HTTPException(400, str(e))
-    usage.forget_all()
+    if isinstance(k, str) and k.strip() or body.get("remove_key"):
+        auth.note(me_.id, "api_key_removed" if body.get("remove_key") else "api_key_saved", _ip(request))
+    usage.forget(me_.id)
+    ctx.bump()
+    return out
+
+
+@app.delete("/api/ai/key")
+def ai_remove(request: Request):
+    me_ = _ai_owner(request)
+    try:
+        out = ai.remove_key()
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    auth.note(me_.id, "api_key_removed", _ip(request))
+    usage.forget(me_.id)
     ctx.bump()
     return out
 
 
 @app.post("/api/ai/models")
 def ai_models(request: Request, body: dict = Body(default={})):
-    _admin(request)
+    _ai_owner(request)
     _throttle("aimodels:" + ctx.uid(), 30, 600)
+    typed = str(body.get("key") or "")
     try:
-        return {"models": ai.list_models(body.get("provider"), body.get("base_url"), body.get("key"))}
+        return {"models": ai.list_models(body.get("provider"), body.get("base_url"), typed)}
     except ValueError as e:
         raise HTTPException(400, str(e))
     except Exception as e:  # noqa: BLE001
         reason = ai.explain(e)
         raise HTTPException(502, f"The service did not give its list of models. {reason}" if reason else
-                            "The service did not give its list of models. Check the key, or type the model yourself. " + _ai_error(e)[:160])
+                            "The service did not give its list of models. Check the key, or type the model yourself. " + _ai_error(e, typed)[:160])
 
 
 @app.post("/api/ai/test")
-def ai_test(request: Request):
-    _admin(request)
+def ai_test(request: Request, body: dict = Body(default={})):
+    _ai_owner(request)
     _throttle("aitest:" + ctx.uid(), 20, 600)
+    typed = str((body or {}).get("key") or "").strip()
     try:
-        return ai.test()
+        return ai.test(typed or None)
     except ValueError as e:
         raise HTTPException(400, str(e))
     except Exception as e:  # noqa: BLE001
-        raise HTTPException(502, ai.explain(e) or "The AI did not answer: " + _ai_error(e))
+        raise HTTPException(502, ai.explain(e) or "The AI did not answer: " + _ai_error(e, typed))
 
 
 # ---------------------------------------------------------------- speech models, one per spoken language
@@ -1410,7 +1531,7 @@ def ai_test(request: Request):
 def _speech_lang(lang: str) -> str:
     from . import fetch_model
     if not fetch_model.known(lang):
-        raise HTTPException(400, "PeakCut has no speech model for that language.")
+        raise HTTPException(400, "NeakClips has no speech model for that language.")
     return lang
 
 
@@ -1529,9 +1650,9 @@ def public_clip(token: str):
     return FileResponse(f, media_type="video/mp4", headers={"Cache-Control": "private, no-store"})
 
 
-# ---------------------------------------------------------------- where PeakCut keeps everything (Settings, Storage)
+# ---------------------------------------------------------------- where NeakClips keeps everything (Settings, Storage)
 def _on_this_computer(request: Request) -> bool:
-    """Is the person sitting at the computer PeakCut runs on? Only then can a folder window be opened for them."""
+    """Is the person sitting at the computer NeakClips runs on? Only then can a folder window be opened for them."""
     host = request.client.host if request.client else ""
     return host in ("127.0.0.1", "::1", "localhost") and not config.env("PEAKCUT_TRUST_PROXY")
 
@@ -1548,7 +1669,7 @@ def storage_open(request: Request):
     from . import storage
     _admin(request)
     if not _on_this_computer(request):
-        raise HTTPException(400, "The folder can only be opened on the computer PeakCut runs on.")
+        raise HTTPException(400, "The folder can only be opened on the computer NeakClips runs on.")
     try:
         storage.open_folder()
     except OSError as e:
@@ -1561,7 +1682,7 @@ def storage_pick(request: Request):
     from . import storage
     _admin(request)
     if not _on_this_computer(request):
-        raise HTTPException(400, "Type the folder's path instead: a folder window can only be shown on the computer PeakCut runs on.")
+        raise HTTPException(400, "Type the folder's path instead: a folder window can only be shown on the computer NeakClips runs on.")
     return {"path": storage.pick_folder()}
 
 
@@ -1656,7 +1777,7 @@ def test_alert():
         auth_problem = str(e)
     if auth_problem:
         raise HTTPException(429, auth_problem)
-    problems = alerts.send("PeakCut: test message. Alerts are working.")
+    problems = alerts.send("NeakClips: test message. Alerts are working.")
     if problems:
         raise HTTPException(400, "; ".join(problems))
     return {"ok": True}
@@ -1713,10 +1834,72 @@ def admin_delete_user(request: Request, uid: str, body: dict = Body(...)):
     return {"ok": True}
 
 
+@app.post("/api/admin/users/{uid}/reset-password")
+def admin_reset_password(request: Request, uid: str, body: dict = Body(default={})):
+    """A one-time link for the person to choose a new password. The admin never sees or picks the password."""
+    me_ = _admin(request)
+    try:
+        hours = int((body or {}).get("hours") or 24)
+    except (TypeError, ValueError):
+        hours = 24
+    try:
+        return admins.reset_link(me_, _uid_ok(uid), hours)
+    except admins.Refused as e:
+        raise HTTPException(e.status, str(e))
+
+
+@app.get("/api/admin/activity")
+def admin_activity(request: Request, user: str = "", limit: int = 200):
+    _admin(request)
+    return admins.activity(_uid_ok(user) if user else None, limit)
+
+
+# ---------------------------------------------------------------- invitations (admins only)
+def _iid_ok(iid: str) -> str:
+    if not invites.valid_id(iid):
+        raise HTTPException(404)
+    return iid
+
+
+@app.get("/api/admin/invitations")
+def admin_invitations(request: Request):
+    _admin(request)
+    return invites.list_all()
+
+
+@app.post("/api/admin/invitations")
+def admin_invite(request: Request, body: dict = Body(...)):
+    me_ = _admin(request)
+    _throttle("invite-make:" + me_.id, 60, 3600)
+    try:
+        return invites.create(me_.id, body.get("email"), body.get("hours"))
+    except invites.InviteError as e:
+        raise HTTPException(e.status, str(e))
+
+
+@app.post("/api/admin/invitations/{iid}/revoke")
+def admin_invite_revoke(request: Request, iid: str):
+    me_ = _admin(request)
+    try:
+        return invites.revoke(me_.id, _iid_ok(iid))
+    except invites.InviteError as e:
+        raise HTTPException(e.status, str(e))
+
+
+@app.post("/api/admin/invitations/{iid}/renew")
+def admin_invite_renew(request: Request, iid: str, body: dict = Body(default={})):
+    me_ = _admin(request)
+    _throttle("invite-make:" + me_.id, 60, 3600)
+    try:
+        return invites.renew(me_.id, _iid_ok(iid), (body or {}).get("hours"))
+    except invites.InviteError as e:
+        raise HTTPException(e.status, str(e))
+
+
 def main():
-    print(f"\n  PeakCut is running:  {config.PUBLIC_URL}\n")
+    print(f"\n  NeakClips is running:  {config.PUBLIC_URL}\n")
     if not config.ACCOUNTS and (config.HTTPS or config.HOST not in ("127.0.0.1", "localhost", "::1")):
-        print("  Sign-in is off, so anyone who can reach this address can use PeakCut and its AI key.\n"
+        print("  Sign-in is off, so anyone who can reach this address can use NeakClips and its AI key.\n"
               "  On a server other people can reach, set PEAKCUT_ACCOUNTS=1 in .env.\n", flush=True)
     if config.env("PEAKCUT_AUTO_RELOAD") == "1":
         # restart by itself whenever the server code changes (pages in web/ never need a restart)

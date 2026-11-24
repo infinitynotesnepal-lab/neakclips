@@ -112,7 +112,49 @@ admin_log = sa.Table(                                                         # 
 )
 
 
+invitations = sa.Table(                                                       # the only way a new account is made
+    "invitations", meta,
+    sa.Column("id", sa.String(40), primary_key=True),
+    sa.Column("token_hash", sa.String(64), nullable=False, unique=True),      # sha256 of the link token; the token itself is never stored
+    sa.Column("email", sa.String(254), nullable=False, index=True),           # the only address that may use it, lower case
+    sa.Column("created_by", sa.String(40)),                                   # the admin, or "server" for the command line
+    sa.Column("created_at", sa.Float, nullable=False),
+    sa.Column("expires_at", sa.Float, nullable=False),
+    sa.Column("status", sa.String(10), nullable=False, server_default="pending"),   # pending | accepted | revoked (expired is worked out)
+    sa.Column("accepted_at", sa.Float),
+    sa.Column("accepted_user", sa.String(40)),
+    sa.Column("revoked_at", sa.Float),
+    sa.Column("revoked_by", sa.String(40)),
+)
+ai_keys = sa.Table(                                                           # each person's own AI key, encrypted (vault.py)
+    "ai_keys", meta,
+    sa.Column("user_id", sa.String(40), sa.ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
+    sa.Column("provider", sa.String(20), nullable=False),
+    sa.Column("models", sa.String(700), nullable=False, server_default=""),   # comma separated, tried in order
+    sa.Column("base_url", sa.String(300), nullable=False, server_default=""),
+    sa.Column("key_enc", sa.Text),                                            # AES-256-GCM, bound to this user; never the key itself
+    sa.Column("key_mask", sa.String(40), nullable=False, server_default=""),  # e.g. AIza••••••••a1B2, the only part ever shown
+    sa.Column("updated_at", sa.Float, nullable=False),
+)
+activity = sa.Table(                                                          # sign-ins and account changes, for admins
+    "activity", meta,
+    sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
+    sa.Column("t", sa.Float, nullable=False, index=True),
+    sa.Column("user_id", sa.String(40), nullable=False),
+    sa.Column("kind", sa.String(30), nullable=False),                         # login | login_failed | logout | joined | ...
+    sa.Column("ip", sa.String(64), nullable=False, server_default=""),
+    sa.Column("detail", sa.String(200), nullable=False, server_default=""),   # never a password, key or link
+    sa.Index("activity_user_t", "user_id", "t"),
+)
+migrations = sa.Table(                                                        # which one-time changes have been made to the data
+    "schema_migrations", meta,
+    sa.Column("name", sa.String(80), primary_key=True),
+    sa.Column("applied_at", sa.Float, nullable=False),
+)
+
+
 def init():
+    """Make any table that is missing. Tables that are already there are never changed or emptied."""
     meta.create_all(engine)
 
 

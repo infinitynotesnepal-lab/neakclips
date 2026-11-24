@@ -1,9 +1,11 @@
-"""Permission tests against a throwaway PeakCut server. Usage: test_permissions.py <base url> <project root> <python exe>"""
+"""Permission tests against a throwaway NeakClips server. Usage: test_permissions.py <base url> <project root> <python exe>"""
 import os
 import subprocess
 import sys
 
 import httpx
+
+from _people import client as _client, invite_token
 
 BASE, ROOT, PY = sys.argv[1], sys.argv[2], sys.argv[3]
 ORIGIN = {"Origin": BASE}
@@ -18,12 +20,14 @@ def check(name, got, want):
 
 
 def client():
-    return httpx.Client(base_url=BASE, timeout=30, follow_redirects=False)
+    return _client(BASE, timeout=30)
 
 
 def signup(email, extra=None):
+    """Accounts come only from invitations. Whatever else is sent along (is_admin, role) must be ignored."""
     c = client()
-    r = c.post("/api/auth/signup", json={"email": email, "password": "test-pass-123", "name": "<img src=x onerror=alert(1)>", **(extra or {})}, headers=ORIGIN)
+    r = c.post("/api/auth/invite/accept", json={"token": invite_token(email, ROOT), "password": "test-pass-123", "confirm": "test-pass-123",
+                                                "name": "<img src=x onerror=alert(1)>", **(extra or {})}, headers=ORIGIN)
     assert r.status_code == 200, r.text
     return c, r.json()["user"]
 
@@ -38,7 +42,8 @@ b, ub = signup("bob@example.com")
 
 # ---- nobody is an admin by signing up, whatever they send
 check("first account is a normal user", ua["role"], "user")
-check("is_admin in signup body ignored", ua["is_admin"], False)
+check("is_admin in the invitation form ignored", ua["is_admin"], False)
+check("nobody can sign up without an invitation", client().post("/api/auth/signup", json={"email": "x@example.com", "password": "test-pass-123"}, headers=ORIGIN).status_code, 403)
 check("no AI key: the app still answers, and says so", a.get("/api/status").json()["ai"]["ready"], False)
 
 # ---- the admin area does not exist for them
@@ -87,7 +92,7 @@ check("admin overview", ov.status_code, 200)
 o = ov.json()
 check("overview counts users", o["totals"]["users"], 2)
 check("overview lists both", sorted(u["email"] for u in o["users"]), ["alice@example.com", "bob@example.com"])
-check("overview never includes password hashes", "password" in ov.text or "scrypt" in ov.text, False)
+check("overview never includes password hashes", any(x in ov.text for x in ("password_hash", "scrypt", "$argon2")), False)
 
 check("user detail", a.get(f"/api/admin/users/{ub['id']}").json()["email"], "bob@example.com")
 check("user detail of an unknown account", a.get("/api/admin/users/u_0000000000000000").status_code, 404)

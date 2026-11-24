@@ -194,7 +194,7 @@ def _put_in_place(tmp: Path, target: Path):
     """Move the freshly written job.json over the old one.
 
     Windows refuses this ("Access is denied") for a moment whenever anything else has the old file open: a virus
-    scanner, the search indexer, or another part of PeakCut reading it. A download saves many times a second, so it
+    scanner, the search indexer, or another part of NeakClips reading it. A download saves many times a second, so it
     happens, and it used to stop the whole video. So it is tried again a few times, and if the file is still busy
     it is written in place; as a last resort this save is skipped, because the next one carries the same news."""
     for i in range(8):

@@ -1,7 +1,9 @@
-"""Abuse and limit tests against a throwaway PeakCut server. Usage: test_abuse.py <base url> <project root>"""
+"""Abuse and limit tests against a throwaway NeakClips server. Usage: test_abuse.py <base url> <project root>"""
 import sys
 
 import httpx
+
+from _people import client
 
 BASE = sys.argv[1]
 ORIGIN = {"Origin": BASE}
@@ -15,10 +17,14 @@ def check(name, got, want):
         fails.append(name)
 
 
-c = httpx.Client(base_url=BASE, timeout=60)
-anon = httpx.Client(base_url=BASE, timeout=60)
-r = c.post("/api/auth/signup", json={"email": "zed@example.com", "password": "test-pass-123", "name": "Zed"}, headers=ORIGIN)
-assert r.status_code == 200, r.text
+# An account from before invitations, whose email was never confirmed: made directly on the server, then signed in.
+import os as _os, subprocess as _sp  # noqa: E401,E402
+_sp.run([sys.executable, "-c", "from studio import auth, db; db.init(); "
+         "auth._create('zed@example.com', 'Zed', password_hash=auth.hash_password('test-pass-123'))"],
+        cwd=sys.argv[2], env=_os.environ, check=True, capture_output=True)
+c = client(BASE)
+assert c.post("/api/auth/login", json={"email": "zed@example.com", "password": "test-pass-123"}, headers=ORIGIN).status_code == 200
+anon = client(BASE)
 
 # ---- big bodies are refused before anything reads them
 big = b"x" * (300 * 1024)
@@ -155,7 +161,7 @@ check("a missing file is never cached", fresh.get("/brand/nope.png").headers.get
 codes = [c.put("/api/creators/sync-test", json={"min_score": 50}, headers=ORIGIN).status_code for _ in range(65)]
 check("creator edits are throttled", (codes[0], codes[-1]), (200, 429))
 bad_login = [anon.post("/api/auth/login", json={"email": "zed@example.com", "password": "wrong"}, headers=ORIGIN).status_code for _ in range(10)]
-check("password guessing is throttled", bad_login[-1], 400)
+check("password guessing is throttled", bad_login[-1], 429)
 check("...and says so", "Too many" in anon.post("/api/auth/login", json={"email": "zed@example.com", "password": "wrong"}, headers=ORIGIN).text, True)
 
 print("\n%d failed" % len(fails) if fails else "\nALL PASSED")

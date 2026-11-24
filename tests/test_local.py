@@ -67,7 +67,10 @@ r = put({"provider": "gemini", "models": "model-a, model-b", "key": KEY})
 check("the key is saved", (r.status_code, r.json()["ready"], r.json()["models"], r.json()["key_hint"]), (200, True, ["model-a", "model-b"], "5678"))
 check("the key itself is never sent back", KEY in r.text or KEY in c.get("/api/ai").text or KEY in c.get("/api/status").text, False)
 check("every page now says the AI is ready", c.get("/api/status").json()["ai"], lambda x: x["ready"] and x["provider"] == "Gemini" and x["model"] == "model-a")
-check("it is kept in the data folder", json.loads((config.DATA_DIR / "ai.json").read_text())["key"], KEY)
+import sqlalchemy as sa  # noqa: E402
+with db.engine.connect() as cn:
+    stored = cn.execute(sa.select(db.ai_keys.c.key_enc)).scalar()
+check("it is kept encrypted, never as plain text", (bool(stored), KEY in (stored or ""), (config.DATA_DIR / "ai.json").exists()), (True, False, False))
 r = put({"provider": "gemini", "models": "model-c", "key": ""})
 check("saving again without typing the key keeps it", (r.status_code, r.json()["has_key"], ai.key()), (200, True, KEY))
 check("changing service without a key is refused, and the old key is not carried over", put({"provider": "openai", "models": "m"}).status_code, 400)

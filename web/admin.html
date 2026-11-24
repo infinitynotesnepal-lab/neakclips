@@ -4,17 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>PeakCut Admin</title>
+<title>NeakClips Admin</title>
+<script src="/assets/csrf.js"></script>
 <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --brand:#FF8B33;--brand-press:#F27A1F;--brand-ink:#2A1A12;--brand-soft:#FFF2E8;--brand-line:#FFD9BC;--brand-deep:#A9480A;
-  --frame:#1E1612;--frame-2:#2C221D;--frame-line:rgba(255,255,255,.08);--frame-text:#F4EEEA;--frame-dim:#A99A91;
-  --bg:#FFFFFF;--muted:#F7F4F1;--line:#EEE8E4;--line-2:#E1D9D3;
-  --text:#211813;--dim:#6D6159;--faint:#A0948C;
+  --brand:#7C5CFF;--brand-press:#6A48F5;--brand-ink:#1B1440;--brand-soft:#F1EDFF;--brand-line:#DCD3FF;--brand-deep:#5B3FD6;
+  --frame:#14112A;--frame-2:#221D42;--frame-line:rgba(255,255,255,.08);--frame-text:#EEEDF7;--frame-dim:#9A97B8;
+  --bg:#FFFFFF;--muted:#F5F5FA;--line:#ECEBF3;--line-2:#DEDCEA;
+  --text:#1B1830;--dim:#5E5B78;--faint:#9592AD;
   --good:#0F8A57;--good-soft:#E6F6EE;--bad:#D3343F;--bad-soft:#FDECEE;
   --r-lg:16px;--r:12px;--r-sm:8px;
   color-scheme:light;
@@ -28,7 +29,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 svg{width:18px;height:18px;flex:none;fill:currentColor}
 ::selection{background:var(--brand-line)}
 :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#E2D9D7;border-radius:999px;border:3px solid #fff}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#DDDBE8;border-radius:999px;border:3px solid #fff}
 
 .app{display:grid;grid-template-columns:240px minmax(0,1fr);height:100vh}
 .side{background:var(--frame);color:var(--frame-text);display:flex;flex-direction:column;height:100vh;padding:14px 10px 12px;min-width:0}
@@ -43,7 +44,7 @@ svg{width:18px;height:18px;flex:none;fill:currentColor}
 .nav-item.on svg{color:var(--brand-ink)}
 .nav-item .label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .count{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);color:var(--frame-text)}
-.nav-item.on .count{background:rgba(42,26,18,.14);color:var(--brand-ink)}
+.nav-item.on .count{background:rgba(27,20,64,.14);color:var(--brand-ink)}
 .side-foot{display:flex;flex-direction:column;gap:2px;padding-top:12px;border-top:1px solid var(--frame-line)}
 .who{padding:10px 10px 2px;font-size:12px;color:var(--frame-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .who b{display:block;font-size:13px;color:var(--frame-text);font-weight:600;overflow:hidden;text-overflow:ellipsis}
@@ -59,15 +60,22 @@ main{background:var(--bg);margin:8px 8px 8px 0;border-radius:var(--r-lg);height:
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 14px;border-radius:var(--r);border:1px solid var(--line-2);background:#fff;color:var(--text);cursor:pointer;text-decoration:none;white-space:nowrap;font-weight:600;transition:background-color .15s ease,border-color .15s ease,color .15s ease}
 .btn:hover{background:var(--muted)}
 .btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
-.btn.primary:hover{background:#FF9A4C;border-color:#FF9A4C}
-.btn.primary:disabled{background:#F3E7DD;border-color:#F3E7DD;color:#B9A597;cursor:not-allowed}
+.btn.primary:hover{background:#8E72FF;border-color:#8E72FF}
+.btn.primary:disabled{background:#ECE8FB;border-color:#ECE8FB;color:#AAA7C2;cursor:not-allowed}
 .btn.danger{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
 .btn.danger:hover{background:#FADDE0}
 .btn.sm{height:32px;padding:0 11px;font-size:13px;gap:6px}
 .btn.sm svg{width:16px;height:16px}
-input[type=text],input[type=search],input[type=number],textarea{height:38px;padding:0 12px;border-radius:var(--r);border:1px solid var(--line-2);background:#fff;width:100%;transition:border-color .15s ease}
-input:hover,textarea:hover{border-color:#CFC4BC}
-input:focus,textarea:focus{outline:0;border-color:var(--brand)}
+input[type=text],input[type=search],input[type=number],input[type=email],select,textarea{height:38px;padding:0 12px;border-radius:var(--r);border:1px solid var(--line-2);background:#fff;width:100%;transition:border-color .15s ease}
+input:hover,textarea:hover,select:hover{border-color:#C9C6DB}
+input:focus,textarea:focus,select:focus{outline:0;border-color:var(--brand)}
+input[readonly]{background:var(--muted);color:var(--text)}
+.invform{display:grid;grid-template-columns:minmax(0,1fr) 180px auto;gap:12px;align-items:end}
+.invform .btn{height:38px}
+.linkbox{display:flex;gap:8px}
+.linkbox input{font:13px/1 ui-monospace,SFMono-Regular,Menlo,monospace}
+.acts .btn+.btn{margin-left:6px}
+@media (max-width:700px){.invform{grid-template-columns:1fr}}
 label.f{display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--dim);font-weight:600}
 
 .card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:22px;margin-bottom:16px}
@@ -109,18 +117,18 @@ td{padding:12px 10px;border-top:1px solid var(--line);vertical-align:middle}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 td.acts{text-align:right;white-space:nowrap}
 tr.u{cursor:pointer}
-tr.u:hover>td{background:#FCFAF8}
+tr.u:hover>td{background:#FAFAFD}
 td .em{font-size:12px;color:var(--dim);overflow-wrap:anywhere}
 td b{color:var(--brand-ink);font-weight:600}
 .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 .toolbar input{max-width:340px}
 .seg{display:flex;gap:2px;padding:3px;background:var(--muted);border-radius:11px}
 .seg button{height:32px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:var(--dim);font-size:13px;font-weight:600;cursor:pointer;transition:background-color .15s ease,color .15s ease}
-.seg button:hover{background:#EDE3DB;color:var(--text)}
+.seg button:hover{background:#E6E3F3;color:var(--text)}
 .seg button.on{background:var(--brand);color:var(--brand-ink)}
 
 dialog{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:var(--r-lg);padding:0;max-width:calc(100vw - 32px)}
-dialog::backdrop{background:rgba(14,12,11,.42)}
+dialog::backdrop{background:rgba(12,11,26,.42)}
 .dlg{padding:24px;width:460px;max-width:100%;display:flex;flex-direction:column;gap:14px}
 .dlg.wide{width:720px;max-height:calc(100vh - 48px);overflow:auto}
 .dlg h2{font-size:18px;font-weight:600;color:var(--brand-ink)}
@@ -130,7 +138,7 @@ dialog::backdrop{background:rgba(14,12,11,.42)}
 .facts div{background:var(--muted);border-radius:var(--r-sm);padding:10px 12px}
 .facts b{display:block;font-size:17px;color:var(--brand-ink);font-variant-numeric:tabular-nums}
 .facts span{font-size:12px;color:var(--dim)}
-.note{background:var(--brand-soft);color:#7A3E0C;border-radius:var(--r-sm);padding:10px 12px;font-size:13px}
+.note{background:var(--brand-soft);color:#46309E;border-radius:var(--r-sm);padding:10px 12px;font-size:13px}
 #toasts{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;z-index:50}
 .toast{background:var(--frame);color:var(--frame-text);border:1px solid var(--frame-2);border-radius:var(--r);padding:12px 16px;max-width:380px;display:flex;gap:10px;align-items:center;font-weight:500}
 .toast::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand);flex:none}
@@ -164,7 +172,7 @@ dialog::backdrop{background:rgba(14,12,11,.42)}
 <body>
 <div class="app">
   <aside class="side" aria-label="Sidebar">
-    <div class="side-head"><img class="logo" src="/brand/logo-light.svg" alt="PeakCut"></div>
+    <div class="side-head"><img class="logo" src="/brand/logo-light.svg" alt="NeakClips"></div>
     <nav class="nav" id="nav" aria-label="Admin"></nav>
     <div class="side-foot" id="foot"></div>
   </aside>
@@ -201,7 +209,17 @@ const kfmt = v => v >= 1e6 ? (v / 1e6).toFixed(1) + "M" : v >= 1e3 ? (v / 1e3).t
 const when = t => t ? new Date(t * 1000).toLocaleString([], {month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"}) : "Never";
 const day = t => t ? new Date(t * 1000).toLocaleDateString([], {day:"numeric", month:"short", year:"numeric"}) : "Never";
 const ago = t => { if (!t) return "Never"; const s = Date.now() / 1000 - t; return s < 300 ? "Now" : s < 3600 ? Math.floor(s / 60) + " min ago" : s < 86400 ? Math.floor(s / 3600) + " h ago" : s < 30 * 86400 ? Math.floor(s / 86400) + " d ago" : day(t); };
-const ACTION = {disable:"Disabled an account", enable:"Enabled an account", delete:"Deleted an account", "role:admin":"Made an admin", "role:user":"Removed admin"};
+const ACTION = {disable:"Disabled an account", enable:"Enabled an account", delete:"Deleted an account", "role:admin":"Made an admin", "role:user":"Removed admin",
+                invite:"Sent an invitation", "invite:revoke":"Revoked an invitation", "invite:renew":"Made a new invitation link",
+                "reset-link":"Made a password reset link", password:"Set a password on the server", email:"Changed a sign-in email"};
+const INV = {pending:["Pending", "warn"], accepted:["Accepted", "ok"], expired:["Expired", ""], revoked:["Revoked", "bad"]};
+const invPill = st => `<span class="pill ${INV[st]?.[1] || ""}">${esc(INV[st]?.[0] || st)}</span>`;
+/* Copying works on a plain http:// address too, where the browser's clipboard API is switched off. */
+async function copyText(text, input) {
+  try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return true; } } catch {}
+  if (input) { input.focus(); input.select(); try { if (document.execCommand("copy")) return true; } catch {} }
+  return false;
+}
 
 async function api(path, opt) {
   const r = await fetch(path, opt);
@@ -215,11 +233,15 @@ function toast(msg, kind = "") {
   $("#toasts").append(t); setTimeout(() => t.remove(), kind === "bad" ? 7000 : 3200);
 }
 
-const S = {tab:"overview", data:null, me:null, q:"", filter:"all", sort:"created_at", fb:null, fbStatus:"new"};
-const TABS = {overview:["Overview", "home", "Sign-ups, videos and AI use across this PeakCut server."],
-              users:["Users", "users", "Every account. Open one to see how much it uses the AI."],
+const S = {tab:"overview", data:null, me:null, q:"", filter:"all", sort:"created_at", fb:null, fbStatus:"new",
+           inv:null, invFilter:"", act:null, actQ:""};
+const TABS = {overview:["Overview", "home", "Accounts, videos and AI use across this NeakClips server."],
+              users:["Users", "users", "Every account and its status. Open one to manage it: enable, disable, reset the password."],
+              invitations:["Invitations", "plus", "New accounts are made only from invitations. Each link works once, for one email."],
+              history:["Invitation history", "clock", "Every invitation: pending, accepted, expired and revoked."],
+              activity:["User activity", "chart", "Sign-ins and account changes, newest first."],
               feedback:["Feedback", "chat", "Bug reports, feature ideas and other messages from users."],
-              activity:["Activity", "clock", "Everything admins have done, newest first."]};
+              log:["Admin log", "check", "Everything admins have done, newest first."]};
 const pathFor = t => "/admin" + (t === "overview" ? "" : "/" + t);
 const fromPath = () => { const k = location.pathname.replace(/\/$/, "").split("/")[2]; return TABS[k] ? k : "overview"; };
 
@@ -249,15 +271,15 @@ const tile = (icon, big, label, small = "") => `<div class="tile"><i>${ic(icon)}
 /* ---------- pages */
 function drawOverview(a) {
   const t = a.totals, sv = a.server, ok = (v, l) => `<span class="pill ${v ? "ok" : "bad"}">${esc(l)}</span>`;
-  const ai = sv.ai_key ? `AI: ${[sv.ai_provider, sv.ai_model].filter(Boolean).join(", ") || "ready"}` : "No AI key";
+  const ai = sv.own_keys ? `${num(t.with_ai_key)} of ${num(t.users)} have a Gemini key` : sv.ai_key ? `AI: ${[sv.ai_provider, sv.ai_model].filter(Boolean).join(", ") || "ready"}` : "No AI key";
   return `<div class="tiles">
       ${tile("users", num(t.users), "Accounts in total", `${num(t.verified)} confirmed their email, ${num(t.disabled)} disabled`)}
-      ${tile("plus", num(t.signups_7d), "Signed up, last 7 days", `${num(t.signups_today)} today, ${num(t.signups_30d)} in 30 days`)}
+      ${tile("plus", num(t.signups_7d), "Joined, last 7 days", `${num(t.invites_waiting || 0)} invitation${t.invites_waiting === 1 ? "" : "s"} waiting, ${num(t.signups_30d)} joined in 30 days`)}
       ${tile("clock", num(t.active_7d), "Active, last 7 days", `${num(t.admins)} admin${t.admins === 1 ? "" : "s"}`)}
       ${tile("video", num(t.videos), "Videos processed", `${num(t.clips)} clips made`)}
     </div><div class="tiles">
       ${tile("bolt", num(t.ai_calls), "AI calls in total", `${num(t.ai_calls_today)} today`)}
-      ${tile("chart", kfmt(t.tokens), "AI tokens used", "Counted on your own AI key")}
+      ${tile("chart", kfmt(t.tokens), "AI tokens used", sv.own_keys ? "Each person on their own key" : "Counted on your own AI key")}
       ${tile("video", num(t.recording), "Recording right now", "Live streams being clipped")}
       ${tile("clock", num(t.working), "Videos in progress", `${num(sv.running)} running, ${num(sv.waiting)} waiting`)}
     </div>
@@ -270,8 +292,8 @@ function drawOverview(a) {
       <div class="card"><div class="card-head"><div><h2>What the AI is used for</h2><p class="sub">All users, all time</p></div></div>${hbars(a.by_purpose, r => `${num(r[1])} call${r[1] === 1 ? "" : "s"} · ${kfmt(r[2])} tokens`)}</div>
     </div>
     <div class="card"><div class="card-head"><div><h2>Right now</h2><p class="sub">${num(t.recording)} recording, ${num(t.working)} video${t.working === 1 ? "" : "s"} in progress</p></div>
-      <div class="row">${ok(sv.ai_key, ai)}${ok(sv.speech_model, "Transcription")}${Object.entries(sv.speech_more || {}).map(([n, y]) => y ? ok(true, n + " speech") : `<span class="pill">${esc(n)} speech: not added</span>`).join("")}${ok(sv.google, "Google sign-in")}${ok(sv.mail, "Email")}<span class="pill">${esc(sv.database)}</span><span class="pill">${esc(sv.free_gb)} GB free</span>${sv.load ? `<span class="pill ${sv.load.busy ? "warn" : "ok"}">${sv.load.busy ? "Near full: new videos are queueing" : "Has room"}</span><span class="pill">Processor ${esc(sv.load.cpu)}%</span><span class="pill">${esc(sv.load.ram_free_gb)} GB memory free</span><span class="pill">${esc(sv.running)} running, ${esc(sv.waiting)} waiting</span>` : ""}</div>
-      ${sv.ai_key ? "" : `<p class="note" style="margin-top:14px">No AI key is set, so clips are picked by loudness only. Add your own key to the .env file on the server (see .env.example) and restart.</p>`}</div>`;
+      <div class="row">${ok(sv.own_keys ? t.with_ai_key > 0 : sv.ai_key, ai)}${ok(sv.speech_model, "Transcription")}${Object.entries(sv.speech_more || {}).map(([n, y]) => y ? ok(true, n + " speech") : `<span class="pill">${esc(n)} speech: not added</span>`).join("")}${ok(sv.google, "Google sign-in")}${ok(sv.mail, "Email")}<span class="pill">${esc(sv.database)}</span><span class="pill">${esc(sv.free_gb)} GB free</span>${sv.load ? `<span class="pill ${sv.load.busy ? "warn" : "ok"}">${sv.load.busy ? "Near full: new videos are queueing" : "Has room"}</span><span class="pill">Processor ${esc(sv.load.cpu)}%</span><span class="pill">${esc(sv.load.ram_free_gb)} GB memory free</span><span class="pill">${esc(sv.running)} running, ${esc(sv.waiting)} waiting</span>` : ""}</div>
+      ${sv.own_keys ? `<p class="note" style="margin-top:14px">Each person adds their own Gemini API key under Settings, API settings, and only their own key is used for their videos. Admins never see the keys.</p>` : sv.ai_key ? "" : `<p class="note" style="margin-top:14px">No AI key is set, so clips are picked by loudness only. Add your own key to the .env file on the server (see .env.example) and restart.</p>`}</div>`;
 }
 
 function userRows(a) {
@@ -289,19 +311,73 @@ function drawUsers(a) {
   return `<div class="toolbar"><input type="search" id="q" placeholder="Search by name or email" value="${esc(S.q)}" aria-label="Search accounts">
       <div class="seg">${seg("all", "All")}${seg("unconfirmed", "Email not confirmed")}${seg("disabled", "Disabled")}${seg("admins", "Admins")}</div>
       <span class="sub">${num(rows.length)} of ${num(a.users.length)}</span></div>
-    <div class="card"><div class="scroll"><table><tr><th>Account</th><th><button data-act="sort" data-k="created_at" style="all:unset;cursor:pointer;color:${S.sort === "created_at" ? "var(--brand-deep)" : "inherit"}">Joined</button></th>
+    <div class="card"><div class="scroll"><table><tr><th>Account</th><th>Status</th><th>Gemini key</th><th><button data-act="sort" data-k="created_at" style="all:unset;cursor:pointer;color:${S.sort === "created_at" ? "var(--brand-deep)" : "inherit"}">Joined</button></th>
       <th><button data-act="sort" data-k="last_seen" style="all:unset;cursor:pointer;color:${S.sort === "last_seen" ? "var(--brand-deep)" : "inherit"}">Last active</button></th>
       ${th("ai_calls", "AI calls")}${th("tokens", "AI tokens")}${th("videos", "Videos")}${th("clips", "Clips")}</tr>
       ${rows.map(u => `<tr class="u" data-act="user" data-id="${esc(u.id)}"><td><b>${esc(u.name || u.email.split("@")[0])}</b>
           ${u.role === "admin" ? ` <span class="pill brand">Admin</span>` : ""}${u.disabled ? ` <span class="pill bad">Disabled</span>` : ""}${u.verified ? "" : ` <span class="pill warn">Email not confirmed</span>`}
           <div class="em">${esc(u.email)}</div></td>
+        <td>${u.disabled ? `<span class="pill bad">Disabled</span>` : `<span class="pill ok">Active</span>`}${u.devices ? `<div class="em">${num(u.devices)} signed-in device${u.devices === 1 ? "" : "s"}</div>` : ""}</td>
+        <td>${u.has_ai_key ? `<span class="pill ok">Added</span>` : `<span class="pill">None</span>`}</td>
         <td class="sub">${esc(day(u.created_at))}</td><td class="sub">${esc(ago(u.last_seen))}</td>
         <td class="num">${num(u.ai_calls)}</td><td class="num">${esc(kfmt(u.tokens || 0))}</td>
         <td class="num">${num(u.videos)}</td><td class="num">${num(u.clips)}</td></tr>`).join("")
-        || `<tr><td colspan="7"><div class="empty"><b>No accounts match</b>Try another search or filter.</div></td></tr>`}</table></div></div>`;
+        || `<tr><td colspan="9"><div class="empty"><b>No accounts match</b>Try another search or filter.</div></td></tr>`}</table></div></div>`;
 }
 
-function drawActivity(a) {
+function drawInvitations() {
+  const v = S.inv;
+  const hours = (v?.hours || [{hours:24, label:"24 hours"}, {hours:72, label:"3 days"}, {hours:168, label:"7 days"}]);
+  const waiting = (v?.items || []).filter(x => x.status === "pending");
+  return `<div class="card"><div class="card-head"><div><h2>Invite someone</h2><p class="sub">They get a link to set their name and password. It works once, only for this email, until it expires.</p></div></div>
+      <form class="invform" id="invform" novalidate>
+        <label class="f">Email address<input type="email" id="inv_email" placeholder="name@example.com" autocomplete="off" required maxlength="254"></label>
+        <label class="f">Link works for<select id="inv_hours">${hours.map(h => `<option value="${h.hours}" ${h.hours === 72 ? "selected" : ""}>${esc(h.label)}</option>`).join("")}</select></label>
+        <button class="btn primary" type="submit" id="inv_go">${ic("plus")}Create invitation</button>
+      </form></div>
+    <div class="card"><div class="card-head"><div><h2>Waiting to be accepted</h2><p class="sub">${num(waiting.length)} pending. For safety a link is shown only when it's made; to send one again, make a new link (the old one stops working).</p></div></div>
+      ${!v ? `<p class="help">Loading…</p>` : waiting.length ? `<div class="scroll"><table><tr><th>Email</th><th>Sent</th><th>Expires</th><th></th></tr>
+        ${waiting.map(x => `<tr><td><b>${esc(x.email)}</b>${x.created_by ? `<div class="em">by ${esc(x.created_by)}</div>` : ""}</td><td class="sub">${esc(when(x.created_at))}</td><td class="sub">${esc(when(x.expires_at))}</td>
+          <td class="acts"><button class="btn sm" data-act="invrenew" data-id="${esc(x.id)}">New link</button><button class="btn sm danger" data-act="invrevoke" data-id="${esc(x.id)}">Revoke</button></td></tr>`).join("")}</table></div>`
+        : `<div class="empty"><b>No pending invitations</b>Invitations you send appear here until they're accepted.</div>`}</div>`;
+}
+function drawHistory() {
+  const v = S.inv; if (!v) return `<div class="empty"><b>Loading…</b></div>`;
+  const seg = (k, l) => `<button class="${S.invFilter === k ? "on" : ""}" data-act="invfilter" data-k="${k}">${l}${k && v.counts[k] ? ` · ${num(v.counts[k])}` : ""}</button>`;
+  const rows = v.items.filter(x => !S.invFilter || x.status === S.invFilter);
+  return `<div class="toolbar"><div class="seg">${seg("", "All")}${seg("pending", "Pending")}${seg("accepted", "Accepted")}${seg("expired", "Expired")}${seg("revoked", "Revoked")}</div>
+      <span class="sub">${num(rows.length)} of ${num(v.items.length)}</span></div>
+    <div class="card"><div class="scroll"><table><tr><th>Email</th><th>Status</th><th>Sent</th><th>Expires</th><th>Outcome</th><th></th></tr>
+      ${rows.map(x => `<tr><td><b>${esc(x.email)}</b>${x.created_by ? `<div class="em">by ${esc(x.created_by)}</div>` : ""}</td><td>${invPill(x.status)}</td>
+        <td class="sub">${esc(when(x.created_at))}</td><td class="sub">${esc(when(x.expires_at))}</td>
+        <td class="sub">${x.status === "accepted" ? `Joined ${esc(when(x.accepted_at))}` : x.status === "revoked" ? `Revoked ${esc(when(x.revoked_at))}${x.revoked_by ? " by " + esc(x.revoked_by) : ""}` : ""}</td>
+        <td class="acts">${x.status === "accepted" ? "" : `<button class="btn sm" data-act="invrenew" data-id="${esc(x.id)}">New link</button>`}${x.status === "pending" ? `<button class="btn sm danger" data-act="invrevoke" data-id="${esc(x.id)}">Revoke</button>` : ""}</td></tr>`).join("")
+        || `<tr><td colspan="6"><div class="empty"><b>Nothing here</b>Invitations appear here once they're sent.</div></td></tr>`}</table></div></div>`;
+}
+function drawUserActivity() {
+  const v = S.act; if (!v) return `<div class="empty"><b>Loading…</b></div>`;
+  const q = S.actQ.trim().toLowerCase();
+  const rows = v.items.filter(x => !q || (x.email || "").toLowerCase().includes(q) || (x.name || "").toLowerCase().includes(q) || x.what.toLowerCase().includes(q));
+  return `<div class="toolbar"><input type="search" id="actq" placeholder="Search by account or event" value="${esc(S.actQ)}" aria-label="Search activity"><span class="sub">${num(rows.length)} of ${num(v.items.length)}</span></div>
+    <div class="card"><div class="scroll"><table><tr><th>When</th><th>Account</th><th>What happened</th><th>From</th></tr>
+      ${rows.map(x => `<tr><td class="sub">${esc(when(x.t))}</td><td><b>${esc(x.name || (x.email || "").split("@")[0] || "Deleted account")}</b><div class="em">${esc(x.email)}</div></td>
+        <td>${x.kind === "login_failed" || x.kind === "disabled" ? `<span class="pill bad">${esc(x.what)}</span>` : esc(x.what)}${x.detail ? `<div class="em">${esc(x.detail)}</div>` : ""}</td>
+        <td class="sub">${esc(x.ip || "")}</td></tr>`).join("")
+        || `<tr><td colspan="4"><div class="empty"><b>Nothing yet</b>Sign-ins and account changes are recorded here.</div></td></tr>`}</table></div></div>`;
+}
+async function loadInv() { try { S.inv = await api("/api/admin/invitations"); } catch (e) { toast(e.message, "bad"); } if (S.tab === "invitations" || S.tab === "history") draw(); }
+async function loadAct() { try { S.act = await api("/api/admin/activity?limit=500"); } catch (e) { toast(e.message, "bad"); } if (S.tab === "activity") draw(); }
+function linkDialog(email, link, expires, title = "Invitation ready") {
+  const d = $("#dlg");
+  d.innerHTML = `<div class="dlg"><h2>${esc(title)}</h2>
+    <p class="help">Send this link to <b>${esc(email)}</b> yourself, by email or chat. It works once, only for that address, until ${esc(when(expires))}.</p>
+    <div class="linkbox"><input type="text" id="linkval" readonly value="${esc(link)}" aria-label="Link"><button class="btn primary" data-act="copylink">Copy</button></div>
+    <p class="note">This is the only time the link is shown. If it's lost, make a new link: the old one stops working.</p>
+    <div class="dlg-foot"><button class="btn" data-act="closedlg">Done</button></div></div>`;
+  if (!d.open) d.showModal();
+  $("#linkval").select();
+}
+function drawLog(a) {
   return `<div class="card"><div class="card-head"><div><h2>Admin activity</h2><p class="sub">A permanent record. Entries cannot be edited or removed from here.</p></div></div>
     ${a.log.length ? `<div class="scroll"><table><tr><th>When</th><th>Admin</th><th>Action</th><th>Account</th><th>Details</th></tr>
       ${a.log.map(l => `<tr><td class="sub">${esc(when(l.t))}</td><td>${esc(l.admin || "Removed admin")}</td><td>${esc(ACTION[l.action] || l.action)}</td>
@@ -321,7 +397,7 @@ function drawFeedback() {
       <p class="fbmsg">${esc(x.message)}</p>${x.context ? `<p class="fbctx">${esc(x.context)}</p>` : ""}
       <div class="row">${x.status !== "seen" ? `<button class="btn sm" data-act="fbset" data-id="${x.id}" data-s="seen">Mark seen</button>` : ""}
         ${x.status !== "done" ? `<button class="btn sm" data-act="fbset" data-id="${x.id}" data-s="done">${ic("check")}Done</button>` : `<button class="btn sm" data-act="fbset" data-id="${x.id}" data-s="new">Reopen</button>`}
-        ${x.email ? `<a class="btn sm" href="mailto:${esc(x.email)}?subject=${encodeURIComponent("About your PeakCut feedback")}">Reply by email</a>` : ""}</div></div>`).join("")
+        ${x.email ? `<a class="btn sm" href="mailto:${esc(x.email)}?subject=${encodeURIComponent("About your NeakClips feedback")}">Reply by email</a>` : ""}</div></div>`).join("")
       : `<div class="card"><div class="empty"><b>Nothing here</b>${S.fbStatus === "new" ? "No new messages. Everything has been looked at." : "Messages appear here as users send them."}</div></div>`}`;
 }
 async function loadFeedback() {
@@ -331,7 +407,7 @@ async function loadFeedback() {
 function draw() {
   const a = S.data, [title, , sub] = TABS[S.tab];
   $("#nav").innerHTML = `<h4>Admin</h4>` + Object.entries(TABS).map(([k, [l, i]]) =>
-    `<a class="nav-item ${S.tab === k ? "on" : ""}" href="${pathFor(k)}" data-act="tab" data-k="${k}">${ic(i)}<span class="label">${l}</span>${k === "users" && a ? `<span class="count">${num(a.totals.users)}</span>` : ""}${k === "feedback" && S.fb?.counts.new ? `<span class="count">${num(S.fb.counts.new)}</span>` : ""}</a>`).join("");
+    `<a class="nav-item ${S.tab === k ? "on" : ""}" href="${pathFor(k)}" data-act="tab" data-k="${k}">${ic(i)}<span class="label">${l}</span>${k === "users" && a ? `<span class="count">${num(a.totals.users)}</span>` : ""}${k === "invitations" && S.inv?.counts.pending ? `<span class="count">${num(S.inv.counts.pending)}</span>` : ""}${k === "feedback" && S.fb?.counts.new ? `<span class="count">${num(S.fb.counts.new)}</span>` : ""}</a>`).join("");
   $("#foot").innerHTML = (S.me ? `<div class="who"><b>${esc(S.me.name)}</b>${esc(S.me.email)}</div>` : "") +
     `<a class="nav-item" href="/app">${ic("arrowr")}<span class="label">Back to the app</span></a>
      <button class="nav-item" data-act="logout">${ic("signout")}<span class="label">Sign out</span></button>`;
@@ -340,8 +416,11 @@ function draw() {
   if (S.tab === "feedback") { if (!S.fb && !S.fbLoading) { S.fbLoading = true; loadFeedback().finally(() => S.fbLoading = false); } $("#view").innerHTML = drawFeedback(); return; }
   if (!a) return;
   const keep = document.activeElement?.id === "q" ? $("#q").selectionStart : null;
-  $("#view").innerHTML = {overview: drawOverview, users: drawUsers, activity: drawActivity}[S.tab](a);
+  const keepAct = document.activeElement?.id === "actq" ? $("#actq").selectionStart : null;
+  $("#view").innerHTML = {overview: drawOverview, users: drawUsers, invitations: drawInvitations, history: drawHistory,
+                          activity: drawUserActivity, log: drawLog}[S.tab](a);
   if (keep !== null) { $("#q").focus(); $("#q").setSelectionRange(keep, keep); }
+  if (keepAct !== null) { $("#actq").focus(); $("#actq").setSelectionRange(keepAct, keepAct); }
 }
 async function load() {
   try { S.data = await api("/api/admin/overview"); draw(); }
@@ -350,6 +429,8 @@ async function load() {
 function go(tab, push = true) {
   S.tab = tab; if (push && location.pathname !== pathFor(tab)) history.pushState(null, "", pathFor(tab));
   if (tab === "feedback") loadFeedback();
+  if (tab === "invitations" || tab === "history") loadInv();
+  if (tab === "activity") loadAct();
   draw(); $("#main").scrollTo(0, 0);
 }
 addEventListener("popstate", () => go(fromPath(), false));
@@ -364,13 +445,19 @@ async function userDialog(id) {
       ${u.role === "admin" ? ` <span class="pill brand">Admin</span>` : ""}${u.disabled ? ` <span class="pill bad">Disabled</span>` : ""}</h2><p class="sub">${esc(u.email)}</p></div>
       <div class="row">
         ${u.role === "admin" ? "" : `<button class="btn sm ${u.disabled ? "" : "danger"}" data-act="disable" data-id="${esc(u.id)}" data-off="${u.disabled ? "0" : "1"}">${u.disabled ? "Enable account" : "Disable account"}</button>`}
+        ${u.id === S.me?.id || u.disabled ? "" : `<button class="btn sm" data-act="resetpw" data-id="${esc(u.id)}">Reset password</button>`}
         ${u.role === "admin" ? "" : `<button class="btn sm danger" data-act="deluser" data-id="${esc(u.id)}">Delete account</button>`}
         <button class="btn sm" data-act="closedlg">Close</button></div></div>
     <div class="facts"><div><b>${num(row.ai_calls)}</b><span>AI calls</span></div><div><b>${esc(kfmt(row.tokens || 0))}</b><span>AI tokens</span></div>
       <div><b>${num(row.videos)}</b><span>Videos</span></div><div><b>${num(row.clips)}</b><span>Clips</span></div>
       <div><b>${esc(day(u.created_at))}</b><span>Joined</span></div><div><b>${esc(ago(u.last_seen))}</b><span>Last active</span></div>
-      <div><b>${num(u.signed_in_devices)}</b><span>Signed-in devices</span></div><div><b>${row.verified === false ? "No" : "Yes"}</b><span>Email confirmed</span></div></div>
-    <p class="note">You can see how much this account uses the AI. Their videos, clips and connected accounts stay private to them.</p>
+      <div><b>${num(u.signed_in_devices)}</b><span>Signed-in devices</span></div><div><b>${row.verified === false ? "No" : "Yes"}</b><span>Email confirmed</span></div>
+      <div><b>${u.disabled ? "Disabled" : "Active"}</b><span>Status</span></div><div><b>${u.has_password ? (u.google ? "Both" : "Password") : u.google ? "Google" : "None"}</b><span>Signs in with</span></div>
+      <div><b>${u.has_ai_key ? "Added" : "None"}</b><span>Gemini key</span></div><div><b>${esc(u.invited_by || "Before invitations")}</b><span>Invited by</span></div></div>
+    <p class="note">You can see this account's status, sign-ins and how much it uses the AI. Their password, API key, videos, clips and connected accounts stay private to them.</p>
+    <h3>Recent sign-ins and changes</h3>
+    ${u.activity?.length ? `<div class="scroll"><table><tr><th>When</th><th>What</th><th>From</th></tr>
+      ${u.activity.map(r => `<tr><td class="sub">${esc(when(r.t))}</td><td>${esc(r.what)}${r.detail ? ` <span class="sub">${esc(r.detail)}</span>` : ""}</td><td class="sub">${esc(r.ip)}</td></tr>`).join("")}</table></div>` : `<p class="help">Nothing recorded yet.</p>`}
     <h3>What they use the AI for</h3>${hbars(u.by_purpose, r => `${kfmt(r[1])} tokens · ${num(r[2])} call${r[2] === 1 ? "" : "s"}`)}
     <h3>Latest AI calls</h3>
     ${u.recent.length ? `<div class="scroll"><table><tr><th>When</th><th>What</th><th class="num">Tokens</th></tr>
@@ -385,16 +472,50 @@ function confirmDialog(title, text, okLabel, danger) {
   });
 }
 
-document.addEventListener("input", e => { if (e.target.id === "q") { S.q = e.target.value; draw(); } });
+document.addEventListener("input", e => { if (e.target.id === "q") { S.q = e.target.value; draw(); } if (e.target.id === "actq") { S.actQ = e.target.value; draw(); } });
+document.addEventListener("submit", async e => {
+  if (e.target.id !== "invform") return;
+  e.preventDefault();
+  const email = $("#inv_email").value.trim(), hours = Number($("#inv_hours").value), b = $("#inv_go");
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return toast("Enter a valid email address.", "bad");
+  b.disabled = true;
+  try {
+    const r = await send("/api/admin/invitations", {email, hours});
+    linkDialog(r.email, r.link, r.expires_at);
+    $("#inv_email").value = ""; await loadInv(); load();
+  } catch (err) { toast(err.message, "bad"); } finally { b.disabled = false; }
+});
 document.addEventListener("click", async e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
   const a = b.dataset.act, d = b.dataset;
   try {
     if (a === "tab") { e.preventDefault(); return go(d.k); }
-    if (a === "refresh") { await load(); await loadFeedback(); return toast("Up to date", "ok"); }
+    if (a === "refresh") { await load(); await loadFeedback(); if (S.inv) await loadInv(); if (S.act) await loadAct(); return toast("Up to date", "ok"); }
     if (a === "fbfilter") { S.fbStatus = d.k; return loadFeedback(); }
     if (a === "fbset") { await send(`/api/admin/feedback/${d.id}`, {status: d.s}); toast(d.s === "done" ? "Marked done" : d.s === "seen" ? "Marked seen" : "Reopened", "ok"); return loadFeedback(); }
     if (a === "filter") { S.filter = d.k; return draw(); }
+    if (a === "invfilter") { S.invFilter = d.k; return draw(); }
+    if (a === "copylink") { const ok = await copyText($("#linkval").value, $("#linkval")); return toast(ok ? "Link copied" : "Select the link and copy it", ok ? "ok" : ""); }
+    if (a === "invrevoke") {
+      const x = S.inv?.items.find(i => i.id === d.id); if (!x) return;
+      if (!await confirmDialog("Revoke this invitation?", `The link sent to ${x.email} stops working straight away. You can make a new one later.`, "Revoke", true)) return;
+      await send(`/api/admin/invitations/${encodeURIComponent(d.id)}/revoke`); toast("Invitation revoked", "ok"); return loadInv();
+    }
+    if (a === "invrenew") {
+      const x = S.inv?.items.find(i => i.id === d.id); if (!x) return;
+      if (!await confirmDialog("Make a new link?", `${x.email} gets a fresh link that works for 3 days. Any earlier link for this invitation stops working.`, "Make new link")) return;
+      const r = await send(`/api/admin/invitations/${encodeURIComponent(d.id)}/renew`, {hours: 72});
+      linkDialog(r.email, r.link, r.expires_at, "New invitation link"); return loadInv();
+    }
+    if (a === "resetpw") {
+      const u = S.data.users.find(x => x.id === d.id); if (!u) return;
+      $("#dlg").close();
+      if (!await confirmDialog("Reset this password?", `You get a one-time link for ${u.email} to choose a new password. You never see or set the password yourself. The link works once, for 24 hours; when it's used, they're signed out everywhere.`, "Make reset link")) return;
+      const r = await send(`/api/admin/users/${encodeURIComponent(d.id)}/reset-password`, {hours: 24});
+      linkDialog(r.email, r.link, Date.now() / 1000 + r.hours * 3600, r.emailed ? "Reset link sent" : "Password reset link");
+      if (r.emailed) toast(`Also emailed to ${r.email}`, "ok");
+      return;
+    }
     if (a === "sort") { e.stopPropagation(); S.sort = d.k; return draw(); }
     if (a === "closedlg") return $("#dlg").close();
     if (a === "user") return userDialog(d.id);
@@ -422,7 +543,8 @@ document.addEventListener("click", async e => {
 (async () => {
   S.tab = fromPath(); draw();
   try { S.me = (await api("/api/auth/me")).user; } catch {}
-  await load();
+  await load(); loadInv();
+  if (S.tab === "activity") loadAct();
   setInterval(() => { if (!$("#dlg").open && document.visibilityState === "visible") load(); }, 30000);
 })();
 </script>

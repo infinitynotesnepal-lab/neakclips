@@ -1,4 +1,7 @@
-"""Accounts and sign-in: email + password, Sign in with Google, and session cookies."""
+"""Accounts and sign-in: email + password, Sign in with Google, and session cookies.
+
+With sign-in on, nobody can make their own account: an admin sends an invitation (invites.py), and that is the only
+way in. Passwords are kept as Argon2id hashes; older scrypt hashes still work and are upgraded at the next sign-in."""
 import collections
 import hashlib
 import hmac
@@ -27,18 +30,49 @@ class AuthError(ValueError):
 
 
 # ---------------------------------------------------------------- passwords
-def hash_password(password: str) -> str:
+try:                                    # Argon2id (RFC 9106), from argon2-cffi. Without it, scrypt is used as before.
+    from argon2 import PasswordHasher as _Argon2
+    from argon2 import exceptions as _argon2_errors
+    _ARGON = _Argon2()                  # the library's defaults: Argon2id, 64 MiB of memory, 3 passes
+except ImportError:                     # pragma: no cover - only before `pip install -r requirements.txt`
+    _ARGON = None
+
+
+def _scrypt_hash(password: str) -> str:
     salt = secrets.token_bytes(16)
     h = hashlib.scrypt(password.encode(), salt=salt, dklen=32, maxmem=64 * 1024 * 1024, **_SCRYPT)
     return f"scrypt${_SCRYPT['n']}${_SCRYPT['r']}${_SCRYPT['p']}${salt.hex()}${h.hex()}"
 
 
+def hash_password(password: str) -> str:
+    return _ARGON.hash(password) if _ARGON else _scrypt_hash(password)
+
+
 def verify_password(password: str, stored: str) -> bool:
     try:
+        if stored.startswith("$argon2"):
+            if not _ARGON:
+                return False
+            try:
+                return _ARGON.verify(stored, password)
+            except _argon2_errors.VerificationError:
+                return False
         _, n, r, p, salt, h = stored.split("$")
         got = hashlib.scrypt(password.encode(), salt=bytes.fromhex(salt), dklen=32, maxmem=64 * 1024 * 1024,
                              n=int(n), r=int(r), p=int(p))
         return hmac.compare_digest(got.hex(), h)
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def needs_rehash(stored: str) -> bool:
+    """True for a hash made the older way (scrypt, or weaker Argon2 settings): it is replaced at the next sign-in."""
+    if not _ARGON or not stored:
+        return False
+    if not stored.startswith("$argon2"):
+        return True
+    try:
+        return _ARGON.check_needs_rehash(stored)
     except Exception:  # noqa: BLE001
         return False
 
@@ -54,8 +88,9 @@ def _check_password_rules(password: str):
 
 
 # ---------------------------------------------------------------- rate limiting (per address and per email)
-def throttle(key: str, limit: int, window: int):
-    """Raise if `key` has been used more than `limit` times in the last `window` seconds."""
+def throttle(key: str, limit: int, window: int, record: bool = True):
+    """Raise if `key` has been used more than `limit` times in the last `window` seconds. With record=False it only
+    looks, so a caller can count failures alone (check first, record when the attempt fails)."""
     now, key = time.time(), key[:200]
     with _lock:
         if len(_attempts) > 20000:     # never let the store of attempts grow without limit
@@ -66,7 +101,8 @@ def throttle(key: str, limit: int, window: int):
             q.popleft()
         if len(q) >= limit:
             raise AuthError("Too many attempts. Wait a few minutes and try again.")
-        q.append(now)
+        if record:
+            q.append(now)
 
 
 # ---------------------------------------------------------------- users
@@ -136,8 +172,8 @@ def _use_link(token: str, purpose: str) -> str:
 def send_verify(u) -> bool:
     from . import mailer
     link = f"{config.PUBLIC_URL}/auth/verify?t={_make_link(u.id, 'verify', 3 * 86400)}"
-    return mailer.send(u.email, "Confirm your email for PeakCut", "Confirm your email",
-                       "Thanks for joining PeakCut. Confirm this is your email address to start clipping.",
+    return mailer.send(u.email, "Confirm your email for NeakClips", "Confirm your email",
+                       "Thanks for joining NeakClips. Confirm this is your email address to start clipping.",
                        "Confirm my email", link, "The link works for 3 days. If you didn't sign up, you can ignore this email.")
 
 
@@ -155,14 +191,17 @@ def forgot(email: str):
     if not u or u.disabled:
         return
     link = f"{config.PUBLIC_URL}/reset?t={_make_link(u.id, 'reset', 3600)}"
-    mailer.send(u.email, "Reset your PeakCut password", "Reset your password",
-                "Someone asked to reset the password for this PeakCut account. If that was you, choose a new one below.",
+    mailer.send(u.email, "Reset your NeakClips password", "Reset your password",
+                "Someone asked to reset the password for this NeakClips account. If that was you, choose a new one below.",
                 "Choose a new password", link, "The link works for one hour. If you didn't ask for this, ignore this email and your password stays the same.")
 
 
 def reset_password(token: str, new: str):
     _check_password_rules(new)
     uid = _use_link(token, "reset")
+    target = get_user(uid)
+    if not target or target.disabled:
+        raise AuthError("This account has been disabled.")
     with db.engine.begin() as c:
         c.execute(db.users.update().where(db.users.c.id == uid).values(password_hash=hash_password(new)))
         c.execute(db.sessions.delete().where(db.sessions.c.user_id == uid))   # sign out everywhere
@@ -199,10 +238,12 @@ def _create(email: str, name: str, password_hash=None, google_sub=None):
     return get_user(uid), first
 
 
-def signup(email: str, password: str, name: str = ""):
-    """A new account with an email and password. Only a salted scrypt hash of the password is kept."""
-    _check_password_rules(password)
-    return _create(email, name, password_hash=hash_password(password))
+INVITE_ONLY = "New accounts are by invitation only. Ask an admin to send you an invitation link."
+
+
+def user_by_email(email: str):
+    with db.engine.connect() as c:
+        return c.execute(sa.select(db.users).where(db.users.c.email == str(email or "").strip().lower()[:254])).first()
 
 
 def login(email: str, password: str):
@@ -218,7 +259,26 @@ def login(email: str, password: str):
         raise AuthError("That email and password don't match.")
     if u.disabled:
         raise AuthError("This account has been disabled.")
+    if needs_rehash(u.password_hash):                # an older hash: replaced now, while the password is at hand
+        with db.engine.begin() as c:
+            c.execute(db.users.update().where(db.users.c.id == u.id, db.users.c.password_hash == u.password_hash)
+                      .values(password_hash=hash_password(password)))
     return get_user(u.id)
+
+
+# ---------------------------------------------------------------- what happened to an account, for the admin page
+def note(uid: str, kind: str, ip: str = "", detail: str = ""):
+    """Record a sign-in or account change. Never pass a password, key or link here."""
+    if not uid:
+        return
+    try:
+        with db.engine.begin() as c:
+            c.execute(db.activity.insert().values(t=time.time(), user_id=uid[:40], kind=kind[:30], ip=(ip or "")[:64],
+                                                  detail=(detail or "")[:200]))
+            if secrets.randbelow(200) == 0:          # now and then, forget entries older than a year
+                c.execute(db.activity.delete().where(db.activity.c.t < time.time() - 365 * 86400))
+    except Exception:  # noqa: BLE001 - never fail a sign-in over the record of it
+        pass
 
 
 def change_password(uid: str, current: str, new: str, keep_token: str = ""):
@@ -397,6 +457,8 @@ def google_finish(code: str, state: str):
         mark_verified(u.id)
         save_photo(u.id, pic)
         return get_user(u.id), False, st[1]
+    if config.ACCOUNTS:
+        raise AuthError(INVITE_ONLY)              # Google can sign in an existing account, never make a new one
     u, first = _create(email, info.get("name") or "", google_sub=info["sub"])
     save_photo(u.id, pic)
     return u, first, st[1]

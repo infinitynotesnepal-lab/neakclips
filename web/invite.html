@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join NeakClips</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<script src="/assets/csrf.js"></script>
+<link rel="icon" type="image/svg+xml" href="/brand/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#7C5CFF;--brand-hi:#8E72FF;--ink:#1B1440;--soft:#F1EDFF;--line-b:#DCD3FF;--deep:#5B3FD6;
+  --frame:#14112A;--frame-2:#221D42;--frame-text:#EEEDF7;--frame-dim:#9A97B8;
+  --muted:#F5F5FA;--line:#ECEBF3;--line-2:#DEDCEA;--text:#1B1830;--dim:#5E5B78;--faint:#9592AD;--bad:#D3343F;--bad-soft:#FDECEE;
+  --r-lg:16px;--r:12px;--r-sm:8px;color-scheme:light}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{margin:0;background:#fff;color:var(--text);font:16px/1.55 "Geist","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p{margin:0}
+a{color:inherit}
+svg{width:18px;height:18px;flex:none;fill:currentColor}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:var(--r);border:1px solid var(--line-2);background:#fff;color:var(--text);
+  font:inherit;font-weight:600;font-size:15px;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s ease,border-color .15s ease,color .15s ease}
+.btn:hover{background:var(--muted);border-color:#CFCDDF}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--ink)}
+.btn.primary:hover{background:var(--brand-hi);border-color:var(--brand-hi)}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}.btn.dark:hover{background:#2D2756;border-color:#2D2756}
+.btn.sm{height:38px;padding:0 14px;font-size:14px}
+.btn.lg{height:52px;padding:0 26px;font-size:16px}
+.btn:disabled{opacity:.5;cursor:default}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+body{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);background:var(--frame)}
+.side{color:var(--frame-text);padding:40px 48px;display:flex;flex-direction:column;justify-content:space-between;min-height:100vh}
+.side img{height:38px}
+.side h1{font-size:clamp(30px,3.2vw,42px);line-height:1.1;letter-spacing:-.03em;font-weight:700;color:#fff;max-width:440px}
+.side h1 em{font-style:normal;color:var(--brand)}
+.side ul{list-style:none;padding:0;margin:28px 0 0;display:flex;flex-direction:column;gap:14px;color:var(--frame-dim);font-size:16px}
+.side li{display:flex;gap:12px;align-items:flex-start}.side li svg{color:var(--brand);margin-top:3px}
+.side small{color:var(--frame-dim);font-size:13px}
+.main{background:#fff;margin:8px 8px 8px 0;border-radius:var(--r-lg);display:grid;place-items:center;padding:32px 20px}
+.card{width:100%;max-width:400px}
+.card h2{font-size:28px;font-weight:700;letter-spacing:-.03em;color:var(--ink)}
+.card>p{color:var(--dim);margin:8px 0 26px}
+form{display:flex;flex-direction:column;gap:16px}
+label{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:600;color:var(--dim)}
+input{height:46px;padding:0 14px;border-radius:var(--r-sm);border:1px solid var(--line-2);background:#fff;font:inherit;color:var(--text);outline:none;transition:border-color .15s ease,background-color .15s ease}
+input:hover{border-color:#CFCDDF}input:focus{border-color:var(--brand);background:#fff}
+input:focus-visible{outline:none}
+input::placeholder{color:var(--faint)}
+.btn{width:100%;height:48px}
+.or{display:flex;align-items:center;gap:14px;color:var(--faint);font-size:13px;margin:20px 0}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.err{display:none;background:var(--bad-soft);color:var(--bad);padding:11px 14px;border-radius:var(--r);font-size:14px;font-weight:500}
+.err.on{display:block}
+.swap{margin-top:22px;text-align:center;color:var(--dim);font-size:15px}
+.swap a{color:var(--deep);font-weight:600;text-decoration:none}.swap a:hover{text-decoration:underline}
+.hint{font-size:13px;color:var(--faint);font-weight:400}
+.pwrow{display:flex;justify-content:space-between;align-items:baseline}
+.pwrow a{font-size:13px;font-weight:600;color:var(--deep);text-decoration:none}.pwrow a:hover{text-decoration:underline}
+.legal{margin-top:14px;font-size:12px;color:var(--faint);text-align:center;line-height:1.5}
+.legal a{color:var(--dim)}
+.g{width:20px;height:20px}
+.mobile-logo{display:none}
+@media (max-width:860px){body{grid-template-columns:1fr;background:#fff}.side{display:none}.main{margin:0;border-radius:0;min-height:100vh;align-content:center}.mobile-logo{display:block;height:34px;margin-bottom:28px}}
+.okbox{background:#E9F6EE;color:#1F7A4D;padding:14px 16px;border-radius:var(--r);font-size:15px;line-height:1.5}
+input[readonly]{background:var(--muted);color:var(--dim);cursor:default}
+input[readonly]:hover{border-color:var(--line-2)}
+</style>
+</head>
+<body>
+<aside class="side">
+  <a href="/" aria-label="NeakClips home"><img src="/brand/logo-light.svg" alt="NeakClips"></a>
+  <div>
+    <h1>Clips from every stream, <em>without watching all of it.</em></h1>
+    <ul>
+      <li><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span>Records live streams and clips them as they happen</span></li>
+      <li><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span>Vertical shorts with word-by-word captions and a hook</span></li>
+      <li><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span>Free and open source: runs on your own AI key</span></li>
+    </ul>
+  </div>
+  <small>© <span id="year"></span> NeakClips · <a href="/privacy" style="color:inherit">Privacy</a> · <a href="/terms" style="color:inherit">Terms</a></small>
+</aside>
+<main class="main"><div class="card">
+  <a href="/"><img class="mobile-logo" src="/brand/logo.svg" alt="NeakClips"></a>
+  <h2 id="h">Join NeakClips</h2><p id="p">Checking your invitation…</p>
+  <div class="err" id="bad" role="alert"></div>
+  <form id="f" novalidate hidden>
+    <div class="err" id="err" role="alert"></div>
+    <label>Email<input id="email" type="email" readonly tabindex="-1" aria-readonly="true"><span class="hint">This invitation is for this address only.</span></label>
+    <label>Full name<input id="name" autocomplete="name" maxlength="120" required placeholder="Your full name"></label>
+    <label>Password<input id="pw" type="password" autocomplete="new-password" required minlength="8" placeholder="Choose a password"><span class="hint">At least 8 characters.</span></label>
+    <label>Confirm password<input id="pw2" type="password" autocomplete="new-password" required minlength="8" placeholder="Type it again"></label>
+    <button class="btn primary" id="go">Create Account</button>
+  </form>
+  <p class="swap" id="swap"><a href="/login">Already have an account? Sign in</a></p>
+</div></main>
+<script>
+/* The token is read from the address and sent to the server in the body of a request, never put into the page. */
+document.getElementById("year").textContent = new Date().getFullYear();
+const $ = id => document.getElementById(id);
+const token = decodeURIComponent(location.pathname.split("/")[2] || "");
+const bad = m => { $("p").textContent = ""; $("bad").textContent = m; $("bad").classList.add("on"); $("f").hidden = true; };
+const fail = m => { $("err").textContent = m; $("err").classList.add("on"); };
+const post = (path, body) => fetch(path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+history.replaceState(null, "", "/invite/" + encodeURIComponent(token));   // drop anything after the token
+(async () => {
+  try {
+    const r = await post("/api/auth/invite/check", {token});
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) return bad(typeof d.detail === "string" ? d.detail : "This invitation link isn't valid.");
+    $("email").value = d.email;
+    $("p").textContent = `You've been invited. Choose your name and a password to finish. This link works until ${new Date(d.expires_at * 1000).toLocaleString([], {day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"})}.`;
+    $("f").hidden = false; $("name").focus();
+  } catch { bad("NeakClips couldn't be reached. Check your connection and reload the page."); }
+})();
+$("f").addEventListener("submit", async e => {
+  e.preventDefault(); $("err").classList.remove("on");
+  const name = $("name").value.trim(), a = $("pw").value, b = $("pw2").value;
+  if (!name) return fail("Enter your full name.");
+  if (a.length < 8) return fail("Use a password of at least 8 characters.");
+  if (a !== b) return fail("The two passwords don't match.");
+  $("go").disabled = true;
+  try {
+    const r = await post("/api/auth/invite/accept", {token, email: $("email").value, name, password: a, confirm: b});
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Something went wrong. Try again.");
+    location.replace("/app");
+  } catch (err) { fail(err.message); $("go").disabled = false; }
+});
+</script>
+</body>
+</html>

@@ -26,6 +26,8 @@ def person(email, admin=False):
             c.execute(db.users.update().where(db.users.c.id == u.id).values(is_admin=True))
     cl = TestClient(server.app, base_url=BASE, follow_redirects=False)
     cl.cookies.set(auth.COOKIE, auth.start_session(u.id))
+    from _people import add_csrf
+    add_csrf(cl).get("/api/public")          # like the real page: holds the CSRF cookie and sends it back
     return u, cl
 boss, a = person("boss@example.com", admin=True)
 user, b = person("user@example.com")

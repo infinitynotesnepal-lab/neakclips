@@ -1,7 +1,7 @@
 """A record of what the AI was used for: one row per call, with the tokens it took.
 
-Nothing is charged for and nothing is limited here. The AI key belongs to whoever runs this server, and their AI
-service bills them directly; this is only so they (and each user) can see where the tokens went."""
+Nothing is charged for and nothing is limited here. With sign-in on, each person uses their own AI key and their AI
+service bills them directly; this is only so they (and admins) can see where the tokens went."""
 import threading
 import time
 from collections import defaultdict
@@ -62,7 +62,7 @@ def brief() -> dict:
             u.user_id == uid, u.t >= midnight)).first()
     out = {"ready": ai.ready(), "provider": ai.label(), "model": (ai.models() or [""])[0],
            "today_calls": int(today[0]), "today_tokens": int(today[1]),
-           "problem": ai.problem["text"] if ai.problem["text"] and now - ai.problem["at"] < 6 * 3600 else ""}
+           "problem": ai.problem_text()}
     _brief[uid] = (now, out)
     return dict(out)
 
